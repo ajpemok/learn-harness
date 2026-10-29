@@ -25,42 +25,24 @@
  * ui-stream subscribe() pattern.
  */
 import { subscribe, type ServerEvent } from "../core/events.ts";
-
-interface StreamLifecycle { draining: boolean; close: Set<() => void> }
-const LIFECYCLE = Symbol.for("lh.eventStreamLifecycle");
-
-/** Share one pair of signal handlers across Next's module instances. */
-function streamLifecycle(): StreamLifecycle {
-	const global = globalThis as typeof globalThis & { [LIFECYCLE]?: StreamLifecycle };
-	if (global[LIFECYCLE]) return global[LIFECYCLE];
-	const lifecycle: StreamLifecycle = { draining: false, close: new Set() };
-	global[LIFECYCLE] = lifecycle;
-	const drain = () => {
-		lifecycle.draining = true;
-		for (const close of [...lifecycle.close]) close();
-	};
-	// Next waits for requests to finish before exiting. An idle SSE response
-	// otherwise holds that shutdown open until the container is forcibly killed.
-	process.once("SIGTERM", drain);
-	process.once("SIGINT", drain);
-	return lifecycle;
-}
+import { onServerShutdown } from "./shutdown.ts";
 
 /** One window's subscription as an SSE Response. */
-export function eventsResponse(): Response {
+export function eventsResponse(signal?: AbortSignal): Response {
 	const encoder = new TextEncoder();
 	let teardown: (() => void) | undefined;
 	const stream = new ReadableStream<Uint8Array>({
 		start(controller) {
-			const lifecycle = streamLifecycle();
 			let closed = false;
 			let heartbeat: ReturnType<typeof setInterval> | undefined;
 			let unsubscribe: (() => void) | undefined;
+			let detachShutdown: (() => void) | undefined;
 
 			const stop = () => {
 				if (closed) return;
 				closed = true;
-				lifecycle.close.delete(finish);
+				detachShutdown?.();
+				signal?.removeEventListener("abort", finish);
 				unsubscribe?.();
 				if (heartbeat) clearInterval(heartbeat);
 			};
@@ -70,8 +52,10 @@ export function eventsResponse(): Response {
 				try { controller.close(); } catch { /* The reader already closed. */ }
 			};
 			teardown = stop;
-			if (lifecycle.draining) { finish(); return; }
-			lifecycle.close.add(finish);
+			if (signal?.aborted) { finish(); return; }
+			detachShutdown = onServerShutdown(finish);
+			if (closed) return;
+			signal?.addEventListener("abort", finish, { once: true });
 			// Enqueue is the ONLY place the socket can reject us (the reader
 			// died) — any failure routes through stop() so the listener and
 			// the heartbeat never outlive the connection.

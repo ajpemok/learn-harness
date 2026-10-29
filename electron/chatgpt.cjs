@@ -210,7 +210,9 @@ function createChatGPT({ store, openExternal, fetch: request = globalThis.fetch,
 	}
 	async function json(url, options = {}) {
 		try {
-			const response = await request(url, { ...options, redirect: "error", signal: options.signal ?? AbortSignal.timeout(15000) });
+			if (closed) throw fail("disconnected");
+			const signal = AbortSignal.any([transportAbort.signal, options.signal ?? AbortSignal.timeout(15000)]);
+			const response = await request(url, { ...options, redirect: "error", signal });
 			if (!response.ok) {
 				const body = await response.json().catch(() => ({}));
 				const oauthCode = typeof body.error === "string" ? body.error : body.error?.code;

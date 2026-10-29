@@ -14,6 +14,37 @@ const { privateKey, publicKey } = await generateKeyPair("RS256");
 const jwk = { ...await exportJWK(publicKey), kid: "scratch-key", alg: "RS256", use: "sig" };
 const tokenUrl = "https://auth.openai.com/api/accounts/oauth/token";
 const initial = () => ({ version: 1, hostId: "urn:uuid:00000000-0000-4000-8000-000000000001", activeId: null as string | null, registrations: [] as any[] });
+
+test("closing an owner aborts blocked discovery and rejects queued refreshes without rewriting credentials", async () => {
+	const state = { ...initial(), activeId: "fixture-account", registrations: [{
+		id: "fixture-account", clientId: "fixture-client", issuer: "https://auth.openai.com", subject: "fixture-subject",
+		tokens: { idToken: "fixture-id", accessToken: "fixture-access", refreshToken: "fixture-refresh", scopes: SCOPES, expiresAt: 0 },
+	}] };
+	const started = deferred<AbortSignal>();
+	let requests = 0;
+	const service = createChatGPT({
+		store: { async read() { return structuredClone(state); }, async write() { assert.fail("Shutdown must retain credentials"); } },
+		openExternal: async () => { assert.fail("No browser should open"); },
+		fetch: async (_url: string, options: RequestInit) => {
+			requests++;
+			const signal = options.signal!;
+			started.resolve(signal);
+			return await new Promise((_resolve, reject) => {
+				if (signal.aborted) reject(signal.reason);
+				else signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+			});
+		},
+	});
+	try {
+		const pending = Promise.all(Array.from({ length: 8 }, () => service.models()));
+		const signal = await completedWithin(started.promise, "provider transport");
+		service.close();
+		await completedWithin(pending, "queued requests after owner shutdown", 1000);
+		assert.equal(signal.aborted, true);
+		assert.equal(requests, 1);
+	} finally { service.close(); }
+});
+
 async function signed(client: string, nonce: string, subject = "scratch-user", overrides: Record<string, unknown> = {}) {
 	return new SignJWT({ nonce, email: "dummy@example.invalid", ...overrides }).setProtectedHeader({ alg: "RS256", kid: "scratch-key" }).setIssuer("https://auth.openai.com").setSubject(subject).setAudience(client).setIssuedAt().setExpirationTime("1h").sign(privateKey);
 }

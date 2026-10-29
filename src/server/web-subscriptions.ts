@@ -10,6 +10,7 @@ import { createSubscriptions } from "../../electron/subscriptions.cjs";
 import { chatGPTControl } from "../../electron/chatgpt-ipc.cjs";
 import { subscriptionControl } from "../../electron/subscription-ipc.cjs";
 import { emit } from "../core/events.ts";
+import { onServerShutdown, serverIsShuttingDown } from "./shutdown.ts";
 import type { ChatGPTStatus } from "../core/contracts/chatgpt.ts";
 import type { NativeSubscriptionSnapshot } from "../core/contracts/subscriptions.ts";
 import { configureWebSubscriptionRuntime, publishWebSubscriptionPacket, webSubscriptionsEnabled, type SubscriptionRuntimeChannel as Channel, type SubscriptionRuntimePacket as Packet } from "../agent/subscription-runtime.ts";
@@ -101,9 +102,11 @@ export function createWebSubscriptionOwner(options: {
 }
 export function webSubscriptionOwner() {
 	if (!webSubscriptionsEnabled()) throw new Error("Web subscription controls are unavailable in desktop-owned mode.");
+	if (serverIsShuttingDown()) throw new Error("The server is shutting down.");
 	const state = registry();
 	if (!state.owner) {
 		state.owner = createWebSubscriptionOwner({ directory: path.dirname(AUTH_FILE), onPacket: publish });
+		onServerShutdown(() => state.owner?.close());
 		process.once("exit", () => state.owner?.close());
 	}
 	return state.owner;

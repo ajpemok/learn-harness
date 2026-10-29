@@ -106,6 +106,19 @@ function decode(chunk: Uint8Array): string {
 }
 
 describe("eventsResponse (the SSE seam)", () => {
+	it("request cancellation closes its stream and releases the subscription", async () => {
+		const abort = new AbortController();
+		const response = eventsResponse(abort.signal);
+		const reader = response.body!.getReader();
+		emit("chats-changed", {});
+		assert.equal((await reader.read()).done, false);
+		abort.abort();
+		assert.equal((await reader.read()).done, true);
+		emit("chats-changed", {});
+		assert.equal((await reader.read()).done, true);
+		assert.equal((await eventsResponse(abort.signal).body!.getReader().read()).done, true);
+	});
+
 	it("holds an SSE response: event frames as they are emitted", async () => {
 		const res = eventsResponse();
 		assert.equal(res.status, 200);

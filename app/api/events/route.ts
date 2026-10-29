@@ -10,6 +10,6 @@ import { eventsResponse } from "@/src/server";
 
 export const dynamic = "force-dynamic";
 
-export function GET(): Response {
-	return eventsResponse();
+export function GET(request: Request): Response {
+	return eventsResponse(request.signal);
 }

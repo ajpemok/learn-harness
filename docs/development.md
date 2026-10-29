@@ -178,6 +178,15 @@ pricing-generation step: Pi AI's catalog and public calculator are the authority
 
 **Dictation.** Optional speech-to-text: the server mints short-lived Deepgram tokens; audio streams browser→Deepgram over WebSocket, never through the server. Settings → Providers → Dictation → Language (below the Deepgram key) offers Nova-3's documented monolingual languages/locales or `language=multi` for automatic multilingual transcription. The app-wide `dictation.language` preference persists through the existing settings record and `PUT /api/settings/dictation`; absent preferences resolve to English (`en`). The settings control locks from connecting through stopping, and reconnects keep the run's original language. A shared preference controller publishes confirmed PUT responses to every reader immediately; the confirmed preference is cached across page navigation and reopening Settings, with no polling or per-recording read. Explicit external dictation-settings notifications invalidate the cache, and capture waits for a successful refresh. Navigating away cancels the run, invalidates pending startup/reconnect work and releases its microphone/socket without appending into another page's input. All other streaming parameters remain unchanged. The picker uses the model dropdown's shared `SearchMenuList` and `MenuShell`: the same fuzzy search, arrow navigation, Enter selection, row styling and scrolling. Its compact mono `SettingsMenuTrigger` is shared with Agent and Appearance; a muted setup line below the key and language rows links the Deepgram Console and states the Member-or-higher key-role requirement.
 
+## Server Shutdown
+
+The Node instrumentation hook initialises shared shutdown state before requests arrive.
+On SIGTERM/SIGINT, notification streams close and the web subscription owner cancels its transports and queued admission.
+Next retains responsibility for draining HTTP requests and exiting.
+Shutdown retains saved credentials; it does not revoke or delete accounts.
+`scripts/smoke-shutdown-runtime.mjs` checks the built standalone server with open streams and blocked provider requests using synthetic credentials and an offline transport.
+The POSIX signal checks run on Linux/macOS; Windows reports that limitation explicitly.
+
 ## ChatGPT Model Metadata
 
 ChatGPT model availability comes from the selected account's discovery response. `src/agent/chatgpt-models.ts` supplies verified subscription-only Terra metadata while Pi SDK 1.4.0 lacks that entry. The SDK wins when it supplies the model, and the account must still advertise it. This compatibility entry does not add API-key routing or grant account access. Its limits and supported reasoning levels cite OpenAI's API specification in the source.
