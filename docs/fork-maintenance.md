@@ -23,10 +23,12 @@ Runtime credentials, learning data, private hostnames and deployment inventories
 | Headless Hosting | Standalone Linux image, persistent state/auth/sources separation, health route and remote ChatGPT callback completion | `Dockerfile`, `.dockerignore`, `docs/headless.md`, web-subscription modules and tests |
 | Study Files | Headless source-root confinement; retain upstream file/PDF/image handling within that boundary | `src/agent/tools/fs-shared.ts`, `tests/headless-sources.test.ts` |
 | Terra Discovery | Account must advertise the model; SDK metadata takes precedence over the temporary compatibility entry | `src/agent/chatgpt-models.ts`, `src/agent/chatgpt-bridge.ts`, `tests/chatgpt-catalog.test.ts` |
+| Shutdown | Initialise cleanup before requests, close notification streams and cancel web provider transports on signals; let Next drain and exit | `instrumentation.ts`, `src/server/shutdown.ts`, `scripts/smoke-shutdown-runtime.mjs` |
 
 Prefer upstream behaviour for model admission, billing disclosure, question authority, persistence and rendering.
 Apply our wording and presentation preferences around those behaviours.
 Keep shared writing guidance at the production model boundary so new provider paths receive it without duplicating prompts.
+Retain shutdown cancellation for discovery and queued credential refreshes; closing providers only on process exit can leave Next waiting for their HTTP requests.
 
 ## Intentional Conflict Resolutions: 0.4.0
 
@@ -35,6 +37,9 @@ Keep shared writing guidance at the production model boundary so new provider pa
 | `src/agent/models.ts`, `piEngineForSpec().streamFn` | Upstream added per-operation custom-provider resolution; our branch added shared writing guidance | Keep upstream resolution, thinking and billing behaviour. Prepare the request context once with `withWritingContext` before either provider branch. Pass that context through both custom and built-in streams. Verify helper, custom-provider and conversation prompt tests. |
 | `components/settings/model-menu.tsx`, `ModelMenuList` billing caption | Upstream added Claude CLI billing and unavailable-price handling; our branch changed label casing | Keep every upstream billing branch. Retain `Subscription Connection`, `Price Unavailable` and `CLI Billing`, and use Learn Harness in authored explanatory copy. Verify model-menu and Claude CLI billing tests. |
 | `tests/chatgpt-connection-ui.test.tsx`, Providers section order | Upstream added the fifth External CLI section; our branch expected four sections with title-cased Model API Keys | Keep five sections and the CLI assertion. Preserve `Model API Keys`. The test must reflect both the added capability and our copy. |
+
+The upstream `tests/claude-code-usage.test.tsx` caption assertion also deliberately uses `CLI Billing` to match our title casing.
+`tests/custom-provider-lifecycle.test.ts` verifies that the shared writing policy reaches the native custom-provider transport once.
 
 An automatic merge is not evidence that local behaviour survived.
 Review the upstream diff for new production model paths, prompt composition, source-file reads and replacement UI components.

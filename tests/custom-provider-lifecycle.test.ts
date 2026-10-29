@@ -6,6 +6,7 @@ import path from "node:path";
 import { after, beforeEach, test } from "node:test";
 import { createCanvas } from "@napi-rs/canvas";
 import { normalizeContext, fauxAssistantMessage, fauxToolCall, type Message } from "@earendil-works/pi-ai";
+import { WRITING_GUIDANCE } from "../src/agent/writing-guidance.ts";
 
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "lh-custom-lifecycle-"));
 const originalEnv = process.env;
@@ -39,6 +40,15 @@ beforeEach(() => {
 	globalThis.fetch = async (url, init) => { capture(url, init); return answer(); };
 });
 after(() => { process.env = originalEnv; globalThis.fetch = originalFetch; fs.rmSync(scratch, { recursive: true, force: true }); });
+
+test("custom requests retain the shared writing policy through native transport", async () => {
+	await run(piEngineForSpec({ provider: "custom", id: "m" }));
+	const messages = requests[0]!.body.messages as { role: string; content: string | { text?: string }[] }[];
+	const instructions = messages.filter((message) => ["system", "developer"].includes(message.role))
+		.map((message) => typeof message.content === "string" ? message.content : message.content.map((part) => part.text ?? "").join(""))
+		.join("\n");
+	assert.equal(instructions.split(WRITING_GUIDANCE).length, 2);
+});
 
 test("native requests revalidate endpoint/model/key/limits with no fallback and retain in-flight setup", async () => {
 	const engine = piEngineForSpec({ provider: "custom", id: "m" });
