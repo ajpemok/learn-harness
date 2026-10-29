@@ -50,6 +50,8 @@ Check the intentional differences above even when Git reports no conflict.
 Start with a clean working tree and retain the deployed source commit and image reference in private operation records.
 Fetch the next upstream release and inspect its changes before merging:
 
+For a new clone, first add the remote once with `git remote add upstream https://github.com/amosblomqvist/learnharness.git`.
+
 ```sh
 git fetch upstream main
 git log --oneline HEAD..upstream/main
@@ -62,6 +64,7 @@ Record new intentional resolutions in this document using function/component lan
 Do not use file-wide `ours` or `theirs` resolution for mixed behaviour and presentation changes.
 
 Run the deterministic tests, lint, type checking, production build, standalone curation and runtime smoke checks.
+Run `node scripts/smoke-image-runtime.mjs --standalone .next/standalone` to check the traced image-processing core, worker and Photon WASM assets.
 Qualify native dependencies and shutdown in the Linux image before deployment.
 Keep the merge commit separate from any subsequent local repair so future comparisons can distinguish imported code from our changes.
 Publish only source and documentation; retain live operation evidence in the private infrastructure repository.
