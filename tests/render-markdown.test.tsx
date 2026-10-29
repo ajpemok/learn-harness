@@ -218,9 +218,9 @@ describe("render — mermaid", () => {
 				retry={() => {}}
 			/>,
 		);
-		assert.match(html, /Diagram failed to render/);
+		assert.match(html, /Diagram Failed to Render/);
 		assert.match(html, /Parse error on line 1/);
-		assert.match(html, /Show diagram source/);
+		assert.match(html, /Show Diagram Source/);
 		assert.match(html, /not a diagram/);
 		assert.match(html, />Retry</);
 	});

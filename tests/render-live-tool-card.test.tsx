@@ -24,7 +24,7 @@ describe("LiveToolCard (the working-state grammar)", () => {
 		// the headline argument rides the header
 		assert.match(html, /notes\.md/);
 		// the streaming input is shown in the expandable body
-		assert.match(html, /Input \(streaming\)/);
+		assert.match(html, /Input \(Streaming\)/);
 		assert.match(html, /notes\.md/);
 	});
 

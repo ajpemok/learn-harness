@@ -15,7 +15,7 @@ describe("AbortTurnBody", () => {
 			<AbortTurnBody mode="turn" onClose={() => {}} onConfirm={() => {}} />,
 		);
 		assert.ok(html.includes('data-testid="abort-turn-dialog"'));
-		assert.match(html, /Abort this turn\?/);
+		assert.match(html, /Abort This Turn\?/);
 		assert.match(html, /The partial answer stays in the transcript\./);
 		assert.match(html, /Cancel/);
 		assert.match(html, /Abort/);
@@ -25,11 +25,11 @@ describe("AbortTurnBody", () => {
 		const html = renderToStaticMarkup(
 			<AbortTurnBody mode="question" onClose={() => {}} onConfirm={() => {}} />,
 		);
-		assert.match(html, /Dismiss this question\?/);
+		assert.match(html, /Dismiss This Question\?/);
 		assert.match(html, /Skipped — the teacher moves on without it\./);
 		assert.match(html, /Dismiss/);
 		// the abort copy must not leak into the dismissal mode
-		assert.ok(!html.includes("Abort this turn"));
+		assert.ok(!html.includes("Abort This Turn"));
 	});
 
 	it("the confirm action is the destructive pair, never the cancel", () => {

@@ -199,17 +199,17 @@ function MermaidInline({ chart }: { chart: string }) {
 				dangerouslySetInnerHTML={{ __html: svg ?? "" }}
 			/>
 			<div className="absolute top-0 right-0 flex items-start gap-0.5">
-				<CopyCorner getText={() => chart} label="Copy diagram source" />
+				<CopyCorner getText={() => chart} label="Copy Diagram Source" />
 				{overlay && (
 					<Hint
 					// Full-screen overlay copy (tooltip wave) — "session view" was
 					// internal direction-speak for the same thing.
-					label="Open full-screen"
+					label="Open Full-Screen"
 					side="bottom"
 				>
 <button
 						type="button"
-						aria-label="Expand diagram"
+						aria-label="Expand Diagram"
 						data-testid="md-mermaid-expand"
 												className="flex size-6 items-center justify-center rounded-md text-muted-foreground/70 opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover/md:opacity-100"
 						onClick={(e) => {
@@ -257,7 +257,7 @@ export function MarkdownCode(props: ComponentProps<"code"> & ExtraProps) {
 	const lineNumbers = !/\bnoLineNumbers\b/.test(meta);
 	return (
 		<div className="group/md relative" data-testid="md-code">
-			<CopyCorner className="absolute top-1.5 right-2 z-10" getText={() => source} label="Copy code" />
+			<CopyCorner className="absolute top-1.5 right-2 z-10" getText={() => source} label="Copy Code" />
 			<CodeBlock
 				code={source}
 				language={language}
@@ -385,7 +385,7 @@ export function MarkdownTable(props: ComponentProps<"table"> & ExtraProps) {
 				// cells it hovers over; the scroll container stays under it (the
 				// corner is fixed to the wrapper, not the scrolling table).
 				className="absolute top-1 right-1 z-10"
-				label="Copy table"
+				label="Copy Table"
 				getText={() => (ref.current ? tableDataToMarkdown(extractTableDataFromElement(ref.current)) : "")}
 			/>
 			<div className="overflow-x-auto">
@@ -434,7 +434,7 @@ export function MathDisplay(props: ComponentProps<"span"> & ExtraProps) {
 		<span className="group/md relative block z-0" data-testid="md-math">
 			<CopyCorner
 				className="absolute top-0 right-0 z-10"
-				label="Copy equation source"
+				label="Copy Equation Source"
 				getText={() => ref.current?.querySelector("annotation")?.textContent ?? ""}
 			/>
 			<span ref={ref} className={className} {...rest}>

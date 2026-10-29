@@ -723,7 +723,7 @@ describe("buildAnswer / formatAnswerMessage: explain", () => {
 // Teaching units are a predict → teach → check cycle. The teach quiz schema
 // carries a REQUIRED `type` declaring the role; the prober's quiz never does
 // (probing questions are role-less). The reveal law keys off it: only CHECKS
-// collapse behind "Check your understanding" — predictions arrive open.
+// collapse behind "Check Your Understanding" — predictions arrive open.
 describe("the quiz role field (predict | check)", () => {
 	const valid = {
 		question: "Which planet is closest to the Sun?",

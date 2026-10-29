@@ -417,7 +417,7 @@ of the discourse. An idea earns its place only when the source's arguments run t
 notation glosses, and restatements that no argument needs are not core ideas. Every idea must stand
 alone for a reader who never saw this source: names and statements may not lean on the source's own
 scaffolding (claim numbering, axiom tags, arc labels); a claim that only matters as part of how this
-document is organized is not knowledge — drop it.
+document is organised is not knowledge — drop it.
 
 When the prompt carries THE GRAPH SO FAR, you are continuing a source already partly extracted: build
 on it. Reference an existing idea by its id ("n_…") instead of restating it, and prefer chains that

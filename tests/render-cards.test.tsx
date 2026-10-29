@@ -171,10 +171,10 @@ describe("render smoke tests", () => {
 		// The learner's voice: a labeled "Your thinking" composer-twin lives
 		// INSIDE the dock — never called optional, inviting the dump.
 		assert.ok(html.includes('data-testid="thinking-field"'), "thinking field present");
-		assert.match(html, /YOUR THINKING/, "labeled as the learner's voice (all caps, owner round 3)");
+		assert.match(html, /Your Thinking/, "labeled as the learner's voice (all caps, owner round 3)");
 		assert.match(html, /Why this answer\? Whatever comes to mind/, "placeholder invites, not apologizes (owner, placeholder round 2026-10-07)");
 		assert.ok(!html.includes("optional"), "the field is never called optional");
-		assert.match(html, /Submit answer/, "send becomes Submit answer");
+		assert.match(html, /Submit Answer/, "send becomes Submit Answer");
 		assert.match(html, /↵ submits · ⇧↵ newline/, "the standard chord is discoverable (owner round 5)");
 		// The v1 desync bug: options are buttons with ARIA roles, not native inputs.
 		assert.ok(!html.includes('type="radio"'), "no native radio inputs");
@@ -200,7 +200,7 @@ describe("render smoke tests", () => {
 		assert.ok(html.includes('role="radio"'), "Other row keeps the option role");
 		assert.match(html, /aria-checked="false"/, "circle starts unfilled");
 		assert.ok(html.includes('data-testid="thinking-field"'), "thinking field coexists with Other");
-		assert.match(html, /YOUR THINKING/, "ask select-mode also gets the learner's voice");
+		assert.match(html, /Your Thinking/, "ask select-mode also gets the learner's voice");
 	});
 
 	it("multi-select ask renders checkbox rows and the select-all hint", () => {
@@ -261,7 +261,7 @@ describe("render smoke tests", () => {
 			input: { question: "Explain the chain rule in your own words." } as never,
 		});
 		assert.ok(html.includes('data-testid="answer-field"'), "text mode is the answer field");
-		assert.match(html, /Your answer/, "labeled as the answer");
+		assert.match(html, /Your Answer/, "labeled as the answer");
 		assert.ok(!html.includes('data-testid="thinking-field"'), "no thinking field in text mode (v1)");
 		assert.ok(!html.includes("⌘/Ctrl"), "no dump shortcut hint — Enter already submits");
 	});
@@ -319,7 +319,7 @@ describe("render smoke tests", () => {
 		});
 		const html = renderToStaticMarkup(<AnsweredCard answer={answer} />);
 		assert.ok(html.includes('data-testid="your-thinking"'), "the thinking row exists");
-		assert.match(html, /YOUR THINKING/, "labeled as the learner's voice (all caps, owner round 3)");
+		assert.match(html, /Your Thinking/, "labeled as the learner's voice (all caps, owner round 3)");
 		// COLLAPSED ARRIVAL (owner round 2, 2026-10-05): the SSR output is the
 		// trigger row only — the thinking text is one click away, never loud.
 		assert.ok(html.includes('data-testid="your-thinking-trigger"'), "the trigger row");
@@ -440,7 +440,7 @@ describe("teach-check reveal (W5 phase separation)", () => {
 				/>,
 		);
 		assert.ok(html.includes('data-testid="teach-check-reveal"'), "invitation affordance present");
-		assert.match(html, /Check your understanding/);
+		assert.match(html, /Check Your Understanding/);
 		assert.match(html, /Which planet is closest/, "question teaser invites, not minimizes");
 		assert.match(html, /Open/, "a clear reveal action");
 	});
@@ -457,7 +457,7 @@ describe("teach-check reveal (W5 phase separation)", () => {
 				/>,
 		);
 		assert.ok(html.includes('data-testid="question-dock-bar"'), "the scroll-collapse strip");
-		assert.ok(!html.includes("Check your understanding"), "no invitation copy outside teach phase");
+		assert.ok(!html.includes("Check Your Understanding"), "no invitation copy outside teach phase");
 		assert.match(html, /Answer/, "the strip keeps its Answer affordance");
 	});
 
@@ -466,7 +466,7 @@ describe("teach-check reveal (W5 phase separation)", () => {
 		// path renders the identical form; this is also the regression pin for it.
 		const html = renderDock({ toolName: "quiz", toolCallId: "t1", input: quizInput as never });
 		assert.ok(html.includes('data-testid="question-dock"'), "the form is the dock's content once expanded");
-		assert.match(html, /Submit answer/);
+		assert.match(html, /Submit Answer/);
 	});
 });
 
@@ -551,7 +551,7 @@ describe("AnsweredCard: the explain variant", () => {
 	it("reveals the single committed answer (reasoning inside it) with NO verdict chips", () => {
 		const html = renderToStaticMarkup(<AnsweredCard answer={buildAnswer(explainQD(), { text: "Something about relativity?" })} />);
 		assert.match(html, /Explain/, "labeled as the explain kind");
-		assert.match(html, /The answer:/);
+		assert.match(html, /The Answer:/);
 		assert.match(html, /luminiferous aether/);
 		assert.match(html, /fringe shift/);
 		assert.ok(!html.includes("Why:"), "no separate explanation field — one committed answer (owner 2026-09-27)");
@@ -700,7 +700,7 @@ describe("predict vs check rendering", () => {
 		const cardAt = html.indexOf("answered-card");
 		assert.ok(blockAt !== -1, "the lifted block renders");
 		assert.ok(blockAt < cardAt, "it sits ABOVE the answered card");
-		assert.ok(html.includes("YOUR THINKING"), "the plain label");
+		assert.ok(html.includes("Your Thinking"), "the plain label");
 		assert.ok(!html.includes("Your thinking while reading"), "the old verbose label is gone");
 		assert.ok(!html.includes("your-reading-thinking"), "the in-card inset is gone");
 		// EXPANDED ARRIVAL (owner round two, 2026-10-07): transcript rows

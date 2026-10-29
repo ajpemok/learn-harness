@@ -98,14 +98,14 @@ export function UpdateSettings({
 					<Button type="button" size="xs" className="cursor-pointer" data-testid="update-restart" onClick={() => window.lh?.installUpdate?.()}>Restart</Button>
 				) : (
 					<Button type="button" size="xs" variant="outline" className="cursor-pointer disabled:cursor-not-allowed" data-testid="update-check" disabled={busy} aria-busy={busy} onClick={check}>
-						{busy && <BrailleSpinner label={state.status === "downloading" ? "Downloading update" : "Checking for updates"} />}
-						Check for updates
+						{busy && <BrailleSpinner label={state.status === "downloading" ? "Downloading Update" : "Checking for Updates"} />}
+						Check for Updates
 					</Button>
 				))}
 			</SettingsRow>
 			{active && (
-				<SettingsRow label="Automatic updates" hint={AUTO_UPDATE_HINT} testid="row-auto-update">
-					<Toggle checked={autoUpdate} label="auto update" onChange={onAutoUpdateChange} />
+				<SettingsRow label="Automatic Updates" hint={AUTO_UPDATE_HINT} testid="row-auto-update">
+					<Toggle checked={autoUpdate} label="Auto Update" onChange={onAutoUpdateChange} />
 				</SettingsRow>
 			)}
 		</>

@@ -51,7 +51,7 @@ describe("CompactionCutDivider", () => {
 		const html = renderToStaticMarkup(<CompactionCutDivider data={data} />);
 		assert.ok(html.includes('data-testid="compaction-cut-divider"'));
 		assert.ok(html.includes("border-t-2 border-dotted"));
-		assert.ok(html.includes("History compacted"));
+		assert.ok(html.includes("History Compacted"));
 		// 152000 → 152k tok
 		assert.ok(html.includes("152k tok"));
 	});

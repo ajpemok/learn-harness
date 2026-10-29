@@ -358,7 +358,7 @@ describe("steer card rendering (the delivered artifact)", () => {
 		assert.match(html, /demo-resize/);
 		assert.match(html, /demo-error/);
 		assert.match(html, /Damped oscillator/);
-		assert.match(html, /interactive demo/i);
+		assert.match(html, /Interactive Demo/i);
 		// the model-facing protocol text never renders for the learner
 		assert.ok(!html.includes("do NOT wait"), "no protocol glue in the bubble");
 	});
@@ -493,7 +493,7 @@ describe("artifact chrome — scrollbar, invert toggles, downloads (release poli
 		assert.match(html, /toggle-invert-demo-brightness/, "the invert switch (house Toggle)");
 		assert.match(html, /data-testid="demo-download"/);
 		assert.ok(!html.includes("hue-rotate"), "inversion is OFF by default — a manual toggle only");
-		assert.match(html, /interactive demo/, "the kind label lives in the caption header");
+		assert.match(html, /Interactive Demo/, "the kind label lives in the caption header");
 		assert.match(html, /Wave interference/, "the title rides beside the kind label");
 	});
 
@@ -520,7 +520,7 @@ describe("artifact chrome — scrollbar, invert toggles, downloads (release poli
 		assert.ok(captionAt < html.indexOf("visual-download"), "the controls ride the caption row");
 		// The invert affordance: the contrast-circle disc + the tooltip.
 		assert.ok(html.includes("size-3"), "the icon disc");
-		assert.ok(html.includes('title="Invert colors"'), "the tooltip names the toggle");
+		assert.ok(html.includes('title="Invert Colours"'), "the tooltip names the toggle");
 		// The half-moon is ACTUALLY filled (owner catch: lucide's Contrast
 		// renders it hollow — fill="none" default; ours fills currentColor).
 		assert.ok(

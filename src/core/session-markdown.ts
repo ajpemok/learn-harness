@@ -128,7 +128,7 @@ function toolResultBody(result: ToolResultMessage, ctx?: MarkdownContext): { hea
 		// pose time — the newest cleanly-posed problem before this conclude.
 		const input = problemInputForConclude(ctx.messages, result.toolCallId);
 		const solution = typeof input?.modelSolution === "string" && input.modelSolution.trim() ? input.modelSolution.trim() : undefined;
-		if (solution !== undefined) body.push(`> **Model solution**\n>\n> ${solution.replace(/\n/g, "\n> ")}`);
+		if (solution !== undefined) body.push(`> **Model Solution**\n>\n> ${solution.replace(/\n/g, "\n> ")}`);
 		return { heading: "Concluded", body };
 	}
 

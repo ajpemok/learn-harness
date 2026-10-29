@@ -349,7 +349,7 @@ export function GraphCostControl({ costs }: { costs: GraphCostSummary }) {
 		<div ref={rootRef} className="relative">
 			<Hint
 				// Trimmed (owner, subtlety round 2026-09-25).
-				label="Graph costs — click for details"
+				label="Graph Costs — Click for Details"
 				side="bottom"
 			>
 				<button
@@ -393,8 +393,8 @@ function GraphCostPanel({ costs }: { costs: GraphCostSummary }) {
 	return (
 		<div className="w-80 max-w-[calc(100vw-1.5rem)] rounded-xl border bg-card/95 p-3 text-xs shadow-lg backdrop-blur">
 			<div className="mb-2 flex items-baseline justify-between">
-				<span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-					Graph pipeline costs
+				<span className="text-[10px] font-medium tracking-wide text-muted-foreground">
+					Graph Pipeline Costs
 				</span>
 				<span className="text-foreground tabular-nums">
 					{graphUsageLabel(costs)}
@@ -465,7 +465,7 @@ function GraphSettingsControl({
 		<div ref={rootRef} className="relative">
 			<Hint
 				// User language (tooltip wave) — "rendering" is internal.
-				label="Graph display settings"
+				label="Graph Display Settings"
 				side="bottom"
 			>
 				<button
@@ -498,7 +498,7 @@ function GraphSettingsControl({
 							    number — src/core/render-settings.ts). Physics keeps the
 							    fine-grained log sliders (step 5). */}
 							<SettingSlider
-								label="Node size"
+								label="Node Size"
 								min={0}
 								max={100}
 								step={10}
@@ -508,7 +508,7 @@ function GraphSettingsControl({
 									changeSettings((cur) => ({ ...cur, nodeSize: fromLadderPosition(p, NODE_SIZE_LADDER) }))}
 							/>
 							<SettingSlider
-								label="Edge width"
+								label="Edge Width"
 								min={0}
 								max={100}
 								step={10}
@@ -518,7 +518,7 @@ function GraphSettingsControl({
 									changeSettings((cur) => ({ ...cur, edgeWidth: fromLadderPosition(p, EDGE_WIDTH_LADDER) }))}
 							/>
 							<SettingSlider
-								label="Arrowhead size"
+								label="Arrowhead Size"
 								min={0}
 								max={100}
 								step={10}
@@ -528,7 +528,7 @@ function GraphSettingsControl({
 									changeSettings((cur) => ({ ...cur, arrowLength: fromLadderPosition(p, ARROW_LENGTH_LADDER) }))}
 							/>
 							<SettingSlider
-								label="Label size"
+								label="Label Size"
 								min={0}
 								max={100}
 								step={10}
@@ -539,7 +539,7 @@ function GraphSettingsControl({
 							/>
 							{/* Display is absolute (ratio / 0.5): "1×" is the default, dead-center (owner, 2026-10-07). */}
 							<SettingSlider
-								label="Labels until zoom"
+								label="Labels Until Zoom"
 								min={0}
 								max={100}
 								step={10}
@@ -556,11 +556,11 @@ function GraphSettingsControl({
 						    the whole build (splat/blur/readback/blit), not just
 						    the paint. */}
 						<div className="mt-1.5 flex flex-col gap-1.5 border-t pt-1.5">
-							<span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+							<span className="text-[10px] font-medium tracking-wide text-muted-foreground">
 								Regions
 							</span>
 							<label className="flex cursor-pointer items-center justify-between text-[11px] text-muted-foreground">
-								<span>Background colors</span>
+								<span>Background Colours</span>
 								<input
 									type="checkbox"
 									checked={settings.regions.enabled}
@@ -602,7 +602,7 @@ function GraphSettingsControl({
 								}
 							/>
 							<SettingSlider
-								label="Edge alpha"
+								label="Edge Alpha"
 								disabled={!regionTuning.enabled}
 								min={0}
 								max={100}
@@ -652,7 +652,7 @@ function GraphSettingsControl({
 								/>
 							</label>
 							<SettingSlider
-								label="Cluster label size"
+								label="Cluster Label Size"
 								disabled={!settings.clusterLabels}
 								min={0}
 								max={100}
@@ -677,11 +677,11 @@ function GraphSettingsControl({
 						    Order (user 2026-09-17): general forces first; depth
 						    anchor + its gray-out-able controls last. */}
 						<div className="mt-1.5 flex flex-col gap-1.5 border-t pt-1.5">
-							<span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+							<span className="text-[10px] font-medium tracking-wide text-muted-foreground">
 								Physics
 							</span>
 							<SettingSlider
-								label="Node repulsion"
+								label="Node Repulsion"
 								min={0}
 								max={100}
 								step={5}
@@ -694,7 +694,7 @@ function GraphSettingsControl({
 									}))}
 							/>
 							<SettingSlider
-								label="Edge attraction"
+								label="Edge Attraction"
 								min={0}
 								max={100}
 								step={5}
@@ -707,7 +707,7 @@ function GraphSettingsControl({
 									}))}
 							/>
 							<SettingSlider
-								label="Edge length"
+								label="Edge Length"
 								min={0}
 								max={100}
 								step={5}
@@ -720,7 +720,7 @@ function GraphSettingsControl({
 									}))}
 							/>
 							<SettingSlider
-								label="Central pull"
+								label="Central Pull"
 								min={0}
 								max={100}
 								step={5}
@@ -733,7 +733,7 @@ function GraphSettingsControl({
 									}))}
 							/>
 							<SettingSlider
-								label="Cluster pull"
+								label="Cluster Pull"
 								min={0}
 								max={100}
 								step={5}
@@ -763,7 +763,7 @@ function GraphSettingsControl({
 							    controls at the very bottom — the grayed group reads
 							    as a self-contained sub-section. */}
 							<label className="flex items-center justify-between gap-2 text-xs">
-								Depth anchor
+								Depth Anchor
 								<select
 									className="rounded border bg-background px-1 py-0.5 text-xs"
 									value={physicsTuning.depthMode}
@@ -775,12 +775,12 @@ function GraphSettingsControl({
 									}
 								>
 									<option value="off">Off</option>
-									<option value="vertical">Vertical (up)</option>
-									<option value="radial">Radial (outward)</option>
+									<option value="vertical">Vertical (Up)</option>
+									<option value="radial">Radial (Outward)</option>
 								</select>
 							</label>
 							<SettingSlider
-								label="Depth strength"
+								label="Depth Strength"
 								disabled={physicsTuning.depthMode === "off"}
 								min={0}
 								max={100}
@@ -794,7 +794,7 @@ function GraphSettingsControl({
 									}))}
 							/>
 							<SettingSlider
-								label="Depth spacing"
+								label="Depth Spacing"
 								disabled={physicsTuning.depthMode === "off"}
 								min={0}
 								max={100}
@@ -808,7 +808,7 @@ function GraphSettingsControl({
 									}))}
 							/>
 							<SettingSlider
-								label="Base ring radius"
+								label="Base Ring Radius"
 								disabled={physicsTuning.depthMode !== "radial"}
 								min={0}
 								max={100}
@@ -872,7 +872,7 @@ export function GraphChromeRow({
 				<div className="graph-chrome-fade-in w-56 min-w-0 shrink rounded-xl border bg-card/85 px-1 py-[3px] shadow-lg backdrop-blur">
 					<Hint
 						// ⌘F focuses node search (surface-scoped registry action).
-						label="Search nodes"
+						label="Search Nodes"
 						action="find"
 						side="bottom"
 					>
@@ -883,7 +883,7 @@ export function GraphChromeRow({
 							value={query}
 							onChange={(e) => onQuery(e.target.value)}
 							placeholder="Search nodes…"
-							aria-label="Search nodes"
+							aria-label="Search Nodes"
 							spellCheck={false}
 							className="h-7 w-full rounded-lg border bg-background pl-8 text-xs outline-none placeholder:text-muted-foreground focus:border-ring"
 						/>
@@ -898,7 +898,7 @@ export function GraphChromeRow({
 			    container (36px band), between the search and Import. */}
 			{!isEmpty && (
 				<div className="graph-chrome-fade-in shrink-0 rounded-xl border bg-card/85 px-1 py-[3px] shadow-lg backdrop-blur">
-					<Hint label="Every reasoning chain" side="bottom">
+					<Hint label="Every Reasoning Chain" side="bottom">
 						<button
 							type="button"
 							onClick={onOpenChains}
@@ -929,7 +929,7 @@ export function GraphChromeRow({
 					// The one button whose action isn't obvious from its label:
 					// the missing fact is where imports go (owner, subtlety
 					// round 2026-09-25).
-					label="Import notes into the graph"
+					label="Import Notes Into the Graph"
 					side="bottom"
 				>
 					<button
@@ -940,7 +940,7 @@ export function GraphChromeRow({
 					className="flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs text-muted-foreground transition-colors hover:bg-accent disabled:opacity-50"
 				>
 						<UploadIcon className="size-3" />
-						{importing ? "Importing…" : "Import notes…"}
+						{importing ? "Importing…" : "Import Notes…"}
 					</button>
 				</Hint>
 			</div>
@@ -1498,9 +1498,9 @@ export function GraphView({
 				<div className="flex h-full w-full items-center justify-center px-4">
 					<div className="flex flex-col items-center gap-3 text-center text-muted-foreground">
 						<WaypointsIcon className="size-10 opacity-40" strokeWidth={1.25} />
-						<div className="text-lg font-medium text-foreground">Knowledge graph</div>
-						<p className="max-w-sm text-sm">
-							Start a session or import notes to build your graph.
+						<div className="text-lg font-medium text-foreground">Knowledge Graph</div>
+						<p className="text-pretty text-sm">
+							Start a session or import notes.
 						</p>
 					</div>
 				</div>

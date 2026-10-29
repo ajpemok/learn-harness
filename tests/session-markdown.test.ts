@@ -164,7 +164,7 @@ describe("sessionMarkdown — the practice join (owner-approved, 2026-10-06)", (
 		const md = sessionMarkdown(messages);
 		assert.ok(md.includes("### Concluded"), "the Concluded heading renders");
 		assert.ok(md.includes("**Solved with hints.** Right answer, one nudge."), "outcome reads as prose, then the verdict");
-		assert.ok(md.includes("> **Model solution**"), "the reveal block quotes the committed solution");
+		assert.ok(md.includes("> **Model Solution**"), "the reveal block quotes the committed solution");
 		assert.ok(md.includes("> Bayes, twice over."), "the solution text carries the blockquote prefix");
 	});
 

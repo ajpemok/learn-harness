@@ -1,4 +1,5 @@
 import type { Model } from "@earendil-works/pi-ai";
+import { chatGPTModelMetadata } from "./chatgpt-models.ts";
 import { onWebSubscriptionPacket, webSubscriptionRequest, webSubscriptionsEnabled } from "./subscription-runtime.ts";
 import type { ChatGPTStatus } from "../core/contracts/chatgpt.ts";
 import type { AdmissionScope, NoDispatchKind } from "./chatgpt-request-cycle.ts";
@@ -111,7 +112,7 @@ export async function chatGPTDenial(scope: AdmissionScope | undefined, controlle
  if (controller.signal.reason === "all" || !chatGPTScopeCurrent(scope)) return "all";
  return !chatGPTBackgroundAllowed() ? "background" : "other";
 }
-/** Preserve account order; unknown capabilities/windows are never fabricated. */
+/** Preserve account order and use SDK or verified compatibility metadata. */
 export async function refreshChatGPTModels(supported: Model<"openai-responses">[]): Promise<void> {
  const state = bridge();
  if (!runtimeConnected()) { clearCatalog(state); return; }
@@ -123,7 +124,7 @@ export async function refreshChatGPTModels(supported: Model<"openai-responses">[
   if (value.epoch !== state.stamp.epoch || value.authorityRevision !== state.stamp.authorityRevision || value.accountId !== state.status.activeId || !chatGPTConnected()) return;
   state.catalogAccount = value.accountId;
   state.models = value.models.flatMap((entry) => {
-   const known = supported.find((m) => m.id === entry.id && m.api === "openai-responses");
+   const known = chatGPTModelMetadata(entry.id, supported);
    return known ? [{ ...known, provider: "chatgpt", name: entry.name, headers: undefined, samplingParams: undefined, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } }] : [];
   });
  } catch { if (sequence === state.catalogRequest) clearCatalog(state); }

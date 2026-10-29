@@ -112,8 +112,8 @@ export function DemoOutputCard({
 	if (failed) {
 		return (
 			<div className="rounded-xl border bg-card p-4 text-card-foreground" data-testid="demo-card-failed">
-				<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-					Interactive demo
+				<div className="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground">
+					Interactive Demo
 					<span className="rounded bg-red-500/15 px-1.5 py-0.5 text-red-500">failed</span>
 				</div>
 				<p className="mt-2 text-sm text-muted-foreground">{result.notes ?? "The demo could not be built."}</p>
@@ -176,8 +176,8 @@ function DemoFrame({
 			   figure card's grammar plus a name. Switch + download far right. */}
 			<div className="flex items-center justify-between gap-2">
 				<div className="flex min-w-0 items-baseline gap-2">
-					<span className="shrink-0 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-						interactive demo
+					<span className="shrink-0 text-xs font-medium tracking-wide text-muted-foreground">
+						Interactive Demo
 					</span>
 					<span className="truncate text-xs font-medium tracking-wide text-foreground">{title}</span>
 				</div>
@@ -185,13 +185,13 @@ function DemoFrame({
 					<Toggle
 						checked={inverted}
 						onChange={toggleInverted}
-						label="Invert demo brightness"
-						title="Invert colors"
+						label="Invert Demo Brightness"
+						title="Invert Colours"
 						discIcon={<InvertDiscIcon className="size-3" />}
 					/>
 					<button
 						type="button"
-						aria-label="Download demo as HTML"
+						aria-label="Download Demo as HTML"
 						title="Download as HTML"
 						onClick={() => downloadFile(`${slugFilename(title)}.html`, html, "text/html")}
 						data-testid="demo-download"
@@ -250,7 +250,7 @@ export function DemoErrorChip({
 			className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-500"
 			data-testid="demo-error-chip"
 		>
-			<span className="font-medium">This demo threw an error</span>
+			<span className="font-medium">This Demo Threw an Error</span>
 			<span className="min-w-0 flex-1 truncate font-mono text-xs" title={message}>
 				{message}
 			</span>
@@ -261,7 +261,7 @@ export function DemoErrorChip({
 					className="rounded-md border border-red-500/40 px-2 py-1 text-xs font-medium hover:bg-red-500/15"
 					data-testid="demo-error-send"
 				>
-					Send to teacher
+					Send to Teacher
 				</button>
 			)}
 		</div>

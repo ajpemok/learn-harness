@@ -41,9 +41,9 @@ export function ProbeDoneCard({ part }: { part: { input?: unknown; output?: unkn
 
 	return (
 		<div data-testid="probe-done-card" className="my-3 rounded-xl border bg-card/60 p-3">
-			<div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+			<div className="mb-2 flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground">
 				<ClipboardCheckIcon className="size-3.5 text-primary" />
-				Probe concluded — your assessment
+				Probe Concluded — Your Assessment
 			</div>
 			{output && !output.ok ? (
 				<p className="text-sm text-muted-foreground">The prober retried: {output.error}</p>

@@ -62,10 +62,10 @@ describe("Composer", () => {
 		assert.ok(/aria-label="Send"[^>]*disabled|disabled[^>]*aria-label="Send"/.test(html), "send disabled");
 	});
 
-	it("THE NEXT MORPH (owner round 16 refinement): empty composer in the pause → wide green Next problem", () => {
+	it("THE NEXT MORPH (owner round 16 refinement): empty composer in the pause → wide green Next Problem", () => {
 		const html = render({ canSend: false, nextProblem: true });
 		assert.ok(html.includes('data-testid="next-problem-button"'), "the morphed button");
-		assert.match(html, /Next problem/, "the label");
+		assert.match(html, /Next Problem/, "the label");
 		assert.ok(html.includes("bg-green-600"), "green — the correct-answer register");
 		assert.ok(!html.includes('aria-label="Send"'), "the square send is gone in the pause");
 	});

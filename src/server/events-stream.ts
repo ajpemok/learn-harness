@@ -19,12 +19,32 @@
  * unnecessary, harmless, and it makes dead-connection detection cheap).
  *
  * The DIFFERENCE from the turn stream is lifetime: a turn's stream ends at
- * settle ([DONE]); this channel ends when the CLIENT goes away — cancel()
- * is the only end, and it must leave the bus untouched for other windows.
+ * settle ([DONE]); this channel ends when the client leaves or the server
+ * shuts down. Closing one window leaves the bus serving the others.
  * The closure shape (teardown assigned in start, called in cancel) is the
  * ui-stream subscribe() pattern.
  */
 import { subscribe, type ServerEvent } from "../core/events.ts";
+
+interface StreamLifecycle { draining: boolean; close: Set<() => void> }
+const LIFECYCLE = Symbol.for("lh.eventStreamLifecycle");
+
+/** Share one pair of signal handlers across Next's module instances. */
+function streamLifecycle(): StreamLifecycle {
+	const global = globalThis as typeof globalThis & { [LIFECYCLE]?: StreamLifecycle };
+	if (global[LIFECYCLE]) return global[LIFECYCLE];
+	const lifecycle: StreamLifecycle = { draining: false, close: new Set() };
+	global[LIFECYCLE] = lifecycle;
+	const drain = () => {
+		lifecycle.draining = true;
+		for (const close of [...lifecycle.close]) close();
+	};
+	// Next waits for requests to finish before exiting. An idle SSE response
+	// otherwise holds that shutdown open until the container is forcibly killed.
+	process.once("SIGTERM", drain);
+	process.once("SIGINT", drain);
+	return lifecycle;
+}
 
 /** One window's subscription as an SSE Response. */
 export function eventsResponse(): Response {
@@ -32,6 +52,7 @@ export function eventsResponse(): Response {
 	let teardown: (() => void) | undefined;
 	const stream = new ReadableStream<Uint8Array>({
 		start(controller) {
+			const lifecycle = streamLifecycle();
 			let closed = false;
 			let heartbeat: ReturnType<typeof setInterval> | undefined;
 			let unsubscribe: (() => void) | undefined;
@@ -39,9 +60,18 @@ export function eventsResponse(): Response {
 			const stop = () => {
 				if (closed) return;
 				closed = true;
+				lifecycle.close.delete(finish);
 				unsubscribe?.();
 				if (heartbeat) clearInterval(heartbeat);
 			};
+			const finish = () => {
+				if (closed) return;
+				stop();
+				try { controller.close(); } catch { /* The reader already closed. */ }
+			};
+			teardown = stop;
+			if (lifecycle.draining) { finish(); return; }
+			lifecycle.close.add(finish);
 			// Enqueue is the ONLY place the socket can reject us (the reader
 			// died) — any failure routes through stop() so the listener and
 			// the heartbeat never outlive the connection.
@@ -62,8 +92,6 @@ export function eventsResponse(): Response {
 				frame(`event: ${type}\ndata: ${JSON.stringify(payload)}\n\n`);
 			});
 			heartbeat = setInterval(() => frame(": ping\n\n"), 25_000);
-
-			teardown = stop;
 		},
 		cancel() {
 			// The view went away: drop the listener + timer. The bus keeps

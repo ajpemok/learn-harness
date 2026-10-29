@@ -268,7 +268,7 @@ export const MessageBranchPrevious = ({
 
   return (
     <Button
-      aria-label="Previous branch"
+      aria-label="Previous Branch"
       disabled={totalBranches <= 1}
       onClick={goToPrevious}
       size="icon-sm"
@@ -291,7 +291,7 @@ export const MessageBranchNext = ({
 
   return (
     <Button
-      aria-label="Next branch"
+      aria-label="Next Branch"
       disabled={totalBranches <= 1}
       onClick={goToNext}
       size="icon-sm"

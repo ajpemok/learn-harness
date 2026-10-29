@@ -138,7 +138,7 @@ const defaultGetThinkingMessage = (isStreaming: boolean) => {
   if (isStreaming) {
     return <Shimmer duration={1}>Thinking...</Shimmer>;
   }
-  return <p>AGENT’S THINKING</p>;
+  return <p>Agent's Thinking</p>;
 };
 
 export const ReasoningTrigger = memo(
@@ -153,10 +153,7 @@ export const ReasoningTrigger = memo(
     return (
       <CollapsibleTrigger
         className={cn(
-          /* The heading register (owner round 4, 2026-10-05): the small
-             mono caps of the card eyebrows — matching YOUR THINKING, whose
-             rail offsets it by exactly the one-character difference. */
-          "flex w-full items-center gap-2 text-muted-foreground text-xs font-medium uppercase tracking-wide transition-colors hover:text-foreground",
+          "flex w-full items-center gap-2 text-muted-foreground text-xs font-medium tracking-wide transition-colors hover:text-foreground",
           className
         )}
         {...props}

@@ -50,7 +50,7 @@ test("three compact rows render in approved order with no browser-only sign-in o
 	assert(html.indexOf('data-testid="chatgpt-connection"') < html.indexOf('data-testid="github-copilot-connection"'));
 	assert(html.indexOf('data-testid="github-copilot-connection"') < html.indexOf('data-testid="xai-connection"'));
 	assert.equal((html.match(/>Connect<\/button>/g) ?? []).length, 3);
-	assert(!html.includes("@")); assert(!html.includes("Add accounts"));
+	assert(!html.includes("@")); assert(!html.includes("Add Accounts"));
 });
 for (const [id, label] of [["github-copilot", "GitHub Copilot"], ["xai", "Grok"]] as const) test(`${id}: disclosure and connection are separate steps with no duplicated content or early authorization`, async () => {
 	const f = fixture(); await mount(); await click(button("Connect", row(id)));
@@ -65,7 +65,7 @@ for (const [id, label] of [["github-copilot", "GitHub Copilot"], ["xai", "Grok"]
 	assert.equal(f.calls.login.length, 0); await click(toggle()); assert.deepEqual(f.calls.consent, []);
 	await click(button("Connect", dialog())); assert.deepEqual(f.calls.login, [[id, false]]);
 	assert(dialog().textContent?.includes("PUBLIC-CODE")); assert(!dialog().querySelector('[data-testid="subscription-privacy-notice"]'));
-	await click(button("Open browser", dialog())); assert.deepEqual(f.calls.open, [[id, "attempt", "opaque-action"]]);
+	await click(button("Open Browser", dialog())); assert.deepEqual(f.calls.open, [[id, "attempt", "opaque-action"]]);
 	await click(button("Cancel", dialog())); assert.equal(f.calls.cancel, 1); assert(!dialog());
 	await click(button("Connect", row(id === "xai" ? "github-copilot" : "xai"))); const newer = dialog(); await act(async () => f.login.resolve());
 	assert(dialog() === newer, "old completion cannot close another provider dialog");
@@ -87,8 +87,8 @@ test("healthy management has only controls, quiet Manage, destructive action lef
 	assert(!row("xai").textContent?.includes("Connected")); assert.match(button("Manage…", row("xai")).className, /text-muted-foreground/);
 	await click(button("Manage…", row("xai")));
 	assert.equal(dialog().querySelector("h2")?.textContent, "Grok");
-	assert(!dialog().querySelector("select")); assert(!dialog().textContent?.includes("Add accounts"));
-	assert(!dialog().querySelector('[data-testid="subscription-privacy-notice"]')); assert(!maybeButton("Reconnect", dialog())); assert(!maybeButton("Sign in again", dialog()));
+	assert(!dialog().querySelector("select")); assert(!dialog().textContent?.includes("Add Accounts"));
+	assert(!dialog().querySelector('[data-testid="subscription-privacy-notice"]')); assert(!maybeButton("Reconnect", dialog())); assert(!maybeButton("Sign in Again", dialog()));
 	assert.equal(footer().firstElementChild, button("Disconnect", dialog())); assert.match(button("Disconnect", dialog()).className, /text-red/);
 	assert.equal(footer().lastElementChild?.lastElementChild, button("Close", dialog()));
 	await click(toggle()); assert.deepEqual(f.calls.consent, [["xai", false]]); assert.equal(f.statuses.find((s) => s.providerId === "github-copilot")!.allowBackgroundUse, true);
@@ -97,10 +97,10 @@ test("healthy management has only controls, quiet Manage, destructive action lef
 	await click(button("Cancel", dialog())); assert(toggle()); assert(!maybeButton("Reconnect", dialog()));
 	await click(button("Disconnect", dialog())); await click(button("Disconnect", dialog())); assert.deepEqual(f.calls.disconnect, ["xai"]); assert(!dialog());
 });
-test("authorization trouble offers Retry and staged Sign in again without removing the saved connection", async () => {
+test("authorization trouble offers Retry and staged Sign in Again without removing the saved connection", async () => {
 	const f = fixture(true); f.push("xai", { connected: false, allowBackgroundUse: false, error: "The connection could not be refreshed." });
 	await mount(); await click(button("Manage…", row("xai"))); await click(button("Retry", dialog())); assert.deepEqual(f.calls.retry, ["xai"]);
-	await click(button("Sign in again", dialog())); assert(dialog().querySelector('[data-testid="subscription-privacy-notice"]')); assert(!toggle());
+	await click(button("Sign in Again", dialog())); assert(dialog().querySelector('[data-testid="subscription-privacy-notice"]')); assert(!toggle());
 	assert.deepEqual(f.calls.login, []); assert.deepEqual(f.calls.disconnect, []); assert.equal(f.statuses.find((s) => s.providerId === "xai")!.connectionId, "local-xai");
 	await click(button("Continue", dialog())); assert.equal(toggle().getAttribute("aria-checked"), "false");
 	await click(toggle()); await click(button("Connect", dialog())); assert.deepEqual(f.calls.login, [["xai", true]]); assert.deepEqual(f.calls.consent, []);
@@ -109,12 +109,12 @@ test("authorization trouble offers Retry and staged Sign in again without removi
 });
 test("a non-authority error on a still-working connection does not expose a healthy reauthorization action", async () => {
 	const f = fixture(true); f.push("xai", { error: "The replacement sign-in did not complete." });
-	await mount(); await click(button("Manage…", row("xai"))); assert(!maybeButton("Sign in again", dialog())); assert(!maybeButton("Retry", dialog()));
+	await mount(); await click(button("Manage…", row("xai"))); assert(!maybeButton("Sign in Again", dialog())); assert(!maybeButton("Retry", dialog()));
 });
 test("storage/desktop unavailability is not presented as an authorization repair action", async () => {
  const f = fixture(true); await mount(); await click(button("Manage…", row("xai")));
  await act(async () => f.push("xai", { available: false, connected: false, error: "The saved connection could not be read or written safely." }));
- assert(!maybeButton("Sign in again", dialog())); assert(!maybeButton("Retry", dialog())); assert(button("Close", dialog()));
+ assert(!maybeButton("Sign in Again", dialog())); assert(!maybeButton("Retry", dialog())); assert(button("Close", dialog()));
 });
 test("required native prompts render and commit cannot be cancelled through button, Escape or backdrop", async () => {
 	const f = fixture(); await mount(); await connectionStep("github-copilot"); await click(button("Connect", dialog()));

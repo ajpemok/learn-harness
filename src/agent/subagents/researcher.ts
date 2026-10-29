@@ -37,7 +37,7 @@ Process:
    and triages the document (page count, size class, flagged pages). Then read it with
    pdf_extract — for long ones, pdf_search first and extract only the pages that hit.
    Cite claims from a PDF as (p. N).
-6. Synthesize everything into a brief that directly answers the question.
+6. Synthesise everything into a brief that directly answers the question.
 
 Evaluation — what to keep vs drop:
 - Official docs and primary sources outweigh blog posts and forum threads.

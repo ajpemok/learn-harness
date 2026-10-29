@@ -170,7 +170,7 @@ function CheatSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="mb-4 flex items-baseline justify-between">
-					<span className="text-sm font-medium text-card-foreground">Keyboard shortcuts</span>
+					<span className="text-sm font-medium text-card-foreground">Keyboard Shortcuts</span>
 					<span className="text-xs text-muted-foreground">Esc to close</span>
 				</div>
 				{scopes.map((scope) => {
@@ -178,7 +178,7 @@ function CheatSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 					if (actions.length === 0) return null;
 					return (
 						<div key={scope} className="mb-4">
-							<div className="mb-1.5 text-xs uppercase tracking-widest text-muted-foreground/70">
+							<div className="mb-1.5 text-xs tracking-widest text-muted-foreground/70">
 								{scopeLabels[scope]}
 							</div>
 							<div className="flex flex-col gap-1">

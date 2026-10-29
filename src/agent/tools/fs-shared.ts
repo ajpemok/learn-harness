@@ -1,4 +1,5 @@
 import * as fs from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
@@ -35,10 +36,26 @@ export const WALK_TIMEOUT_MS = 10_000;
  */
 const EXCLUDED_DIR_NAMES = new Set(["node_modules", ".git", "Library", ".Trash"]);
 
-/** Resolve a tool path argument: absolute stays, relative/absent → home.
+/** LH_SOURCES_DIR confines server study files, including symlink targets.
+ * Without it, preserve desktop behaviour: absolute stays, relative/absent → home.
  *  (pi resolves against the project cwd; the harness's "project" is the
  *  learner's life, so the home directory is the anchor.) */
 export function resolveSourcePath(p?: string): string {
+	const configured = process.env.LH_SOURCES_DIR;
+	if (configured !== undefined) {
+		if (!configured || !path.isAbsolute(configured)) throw new Error("LH_SOURCES_DIR must be an absolute study folder.");
+		const root = path.resolve(configured);
+		const candidate = path.resolve(root, p || ".");
+		const contained = (base: string, target: string) => {
+			const relative = path.relative(base, target);
+			return relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
+		};
+		if (!contained(root, candidate)) throw new Error("Only files in the study folder are available.");
+		// These are runtime study paths, never build inputs for Next's tracer.
+		const canonical = realpathSync(/* turbopackIgnore: true */ candidate);
+		if (!contained(realpathSync(/* turbopackIgnore: true */ root), canonical)) throw new Error("Only files in the study folder are available.");
+		return canonical;
+	}
 	if (!p) return os.homedir();
 	return path.isAbsolute(p) ? p : path.join(os.homedir(), p);
 }

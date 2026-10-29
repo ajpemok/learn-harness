@@ -38,6 +38,7 @@ process.env.LH_DATA_DIR = TMP_DATA;
 const { PROMPTS_OVERRIDE_DIR } = await import("../config.ts");
 const teacherAgent = await import("../src/agent/teacher-agent.ts");
 const { allSegmentPaths, effectivePromptSegments } = await import("../src/agent/prompt-segments.ts");
+const { withWritingGuidance } = await import("../src/agent/writing-guidance.ts");
 const { isValidSegmentPath } = await import("../src/core/prompt-segments.ts");
 const { promptOverrides } = await import("../src/store/prompt-overrides.ts");
 // Route-level pins drive the actual app/api handlers (framework-free
@@ -267,8 +268,8 @@ describe("composeInstructions: override honoring + the byte-identical source pat
 				...fragmentsOf("src/agent/prompts/shared"),
 			].join("\n\n---\n\n");
 		};
-		assert.equal(composeInstructions("teacher"), oldLoader("teacher"));
-		assert.equal(composeInstructions("prober"), oldLoader("prober"));
+		assert.equal(composeInstructions("teacher"), withWritingGuidance(oldLoader("teacher")));
+		assert.equal(composeInstructions("prober"), withWritingGuidance(oldLoader("prober")));
 	});
 
 	it("an enabled override swaps in; switch off or file absent composes source", () => {

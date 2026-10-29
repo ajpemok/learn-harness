@@ -173,9 +173,9 @@ describe("the practice draft (?mode=practice, 2026-10-04)", () => {
 				mode="practice"
 			/>,
 		);
-		assert.match(html, /New practice session/);
-		assert.ok(html.includes("Pick nodes from your knowledge graph, describe what you want to practice, or bring your own problem."));
-		assert.match(html, /What do you want to practice\?/);
+		assert.match(html, /New Practice Session/);
+		assert.ok(html.includes("Pick nodes from your knowledge graph, describe what you want to practise, or bring your own problem."));
+		assert.match(html, /What do you want to practise\?/);
 	});
 
 	it("THE PICK BAR (owner round 10): the practice draft carries the same pill above its composer", () => {
@@ -188,7 +188,7 @@ describe("the practice draft (?mode=practice, 2026-10-04)", () => {
 				mode="practice"
 			/>,
 		);
-		assert.match(html, />Pick nodes<\/button>/);
+		assert.match(html, />Pick Nodes<\/button>/);
 		// picked: count + Clear, the home register verbatim
 		const picked = renderToStaticMarkup(
 			<DraftShell
@@ -200,7 +200,7 @@ describe("the practice draft (?mode=practice, 2026-10-04)", () => {
 				picks={[{ id: "n_1", name: "Parity", statement: "Odd + odd = even." }]}
 			/>,
 		);
-		assert.match(picked, /1 node selected/);
+		assert.match(picked, /1 Node Selected/);
 		assert.match(picked, /Clear/);
 		// teach mode with nothing picked renders nothing (home's law)
 		const teach = renderToStaticMarkup(

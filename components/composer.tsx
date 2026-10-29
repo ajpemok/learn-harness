@@ -136,10 +136,10 @@ export function Composer({
 					<button
 						type="submit"
 						data-testid="next-problem-button"
-						aria-label="Next problem"
-						className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-[10px] bg-green-600 px-4 font-ui text-xs font-medium uppercase tracking-wide text-white transition-colors hover:bg-green-500"
+						aria-label="Next Problem"
+						className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-[10px] bg-green-600 px-4 font-ui text-xs font-medium tracking-wide text-white transition-colors hover:bg-green-500"
 					>
-						Next problem
+						Next Problem
 						<ArrowRightIcon className="size-4" />
 					</button>
 				) : (

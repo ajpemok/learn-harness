@@ -17,6 +17,6 @@ Rules for adding a fragment:
   agent's tools" rule below still applies, so shared fragments may only cover tools
   both agents actually hold.
 - One fragment per workstream — your brief tells you which filename you own.
-- Document YOUR agent's tools/behaviors exactly; reference tool input field names verbatim (they must match the zod schemas).
+- Document YOUR agent's tools/behaviours exactly; reference tool input field names verbatim (they must match the zod schemas).
 - Keep it tight: fragments are always in context. No restating the base prompt.
 - The two agents share one transcript but never one toolset — never reference the other agent's tools as if you had them.

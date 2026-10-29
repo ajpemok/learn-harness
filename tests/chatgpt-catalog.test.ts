@@ -1,6 +1,7 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { piModels } from "../src/agent/models.ts";
+import { getSupportedThinkingLevels } from "@earendil-works/pi-ai";
 import { refreshChatGPTModels, chatGPTModels, chatGPTStatus, chatGPTScope, chatGPTScopeCurrent, chatGPTLease, chatGPTAbortController } from "../src/agent/chatgpt-bridge.ts";
 const send = Object.getOwnPropertyDescriptor(process, "send"), connected = Object.getOwnPropertyDescriptor(process, "connected");
 const desktopMarker = process.env.LH_DESKTOP_SERVER, desktopSecret = process.env.LH_DESKTOP_API_SECRET;
@@ -49,4 +50,40 @@ test("account/full and catalog authority changes reject outstanding old leases w
  const newScope = chatGPTScope(model.id); assert.equal(newScope.accountId, "B");
  ipc({ channel: "lh:chatgpt", kind: "state", stamp: { epoch: 2, authorityRevision: 3, revision: 8 }, status: status("B"), invalidate: "none" });
  assert.equal(chatGPTModels().length, 0); await assert.rejects(chatGPTLease(newScope, false));
+});
+
+test("provider-advertised Terra works before the SDK catalogue includes it", async () => {
+ const refresh = refreshChatGPTModels([]);
+ reply(pending.at(-1), { ...value("unused", 20, "C", 4), models: [
+  { id: "gpt-6.1-terra", name: "Terra from this account" },
+  { id: "unrecognised-future-model", name: "Unknown capabilities" },
+ ] });
+ await refresh;
+ const catalog = chatGPTModels(); assert.equal(catalog.length, 1);
+ const terra = catalog[0]!;
+ assert.equal(terra.id, "gpt-6.1-terra"); assert.equal(terra.name, "Terra from this account");
+ assert.equal(terra.provider, "chatgpt"); assert.equal(terra.api, "openai-responses");
+ assert.equal(terra.contextWindow, 1_050_000); assert.equal(terra.maxTokens, 128_000);
+ assert.deepEqual(terra.input, ["text", "image"]);
+ assert.deepEqual(getSupportedThinkingLevels(terra), ["off", "low", "medium", "high", "xhigh", "max"]);
+ assert.deepEqual(terra.cost, { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+ assert.equal(chatGPTScope(terra.id).accountId, "C");
+});
+
+test("SDK Terra metadata supersedes the compatibility entry without retaining request headers", async () => {
+ const sdk = { ...model, id: "gpt-6.1-terra", contextWindow: 500_000, headers: { "Fixture-Header": "fixture" } };
+ const refresh = refreshChatGPTModels([sdk as never]);
+ reply(pending.at(-1), { ...value("unused", 21, "C", 4), models: [{ id: sdk.id, name: "Terra" }] });
+ await refresh;
+ assert.equal(chatGPTModels()[0]?.contextWindow, 500_000);
+ assert.equal(chatGPTModels()[0]?.headers, undefined);
+});
+
+test("compatibility metadata never makes an unadvertised model available", async () => {
+ const scope = chatGPTScope("gpt-6.1-terra");
+ const refresh = refreshChatGPTModels([]);
+ reply(pending.at(-1), { ...value("unused", 22, "C", 5), models: [] });
+ await refresh;
+ assert.deepEqual(chatGPTModels(), []); assert.equal(chatGPTScopeCurrent(scope), false);
+ assert.throws(() => chatGPTScope("gpt-6.1-terra"));
 });

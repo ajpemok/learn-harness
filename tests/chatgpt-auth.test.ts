@@ -71,7 +71,7 @@ test("PKCE/state/nonce/host identity and exact ephemeral 127.0.0.1 callback; no 
 		await f.service.login();
 		const params = f.url.searchParams;
 		assert.equal(params.get("client_id"), "dynamic_agent_client");
-		assert.equal(params.get("agent_name_hint"), "LearnHarness");
+		assert.equal(params.get("agent_name_hint"), "Learn Harness");
 		assert.equal(params.get("ext_agent_host_id"), f.saved.hostId);
 		assert.equal(new URL(params.get("redirect_uri")!).hostname, "127.0.0.1");
 		assert.equal(new URL(params.get("redirect_uri")!).pathname, "/auth/callback");
@@ -94,6 +94,43 @@ test("PKCE/state/nonce/host identity and exact ephemeral 127.0.0.1 callback; no 
 		assert.equal((await f.service.lease(true)).accessToken, "scratch-oauth-token");
 		await f.service.consent(false);
 		await assert.rejects(f.service.lease(true), /background/);
+	} finally { f.service.close(); }
+});
+
+function pasted(f: ReturnType<typeof fixture>, params: Record<string, string> = {}, redirect = f.url.searchParams.get("redirect_uri")!) {
+	const callback = new URL(redirect);
+	callback.search = new URLSearchParams({ state: f.url.searchParams.get("state")!, code: "scratch-code", client_id: "oaiapp_scratch", ...params }).toString();
+	return callback.toString();
+}
+
+test("a pasted callback address completes the pending sign-in through the listener's checks and closes the listener", async () => {
+	const f = fixture();
+	try {
+		await f.service.login();
+		const redirect = f.url.searchParams.get("redirect_uri")!;
+		const other = new URL(redirect); other.port = String(Number(other.port) === 65535 ? 1 : Number(other.port) + 1);
+		for (const address of ["not a url", "x".repeat(4097), pasted(f, { state: "wrong" }), pasted(f, {}, `${redirect}x`), pasted(f, {}, other.toString()), pasted(f, {}, redirect.replace("127.0.0.1", "localhost")), pasted(f, {}, redirect.replace("http:", "https:")), `${pasted(f)}#fragment`, pasted(f, {}, redirect.replace("127.0.0.1", "user:pass@127.0.0.1")), `${pasted(f)}&state=duplicate`, `${pasted(f)}&code=duplicate`]) {
+			await assert.rejects(f.service.completeLogin(address), /callback/);
+		}
+		assert.equal(f.requests.length, 0, "a rejected paste must never exchange a code");
+		assert.equal((await f.service.status()).pending, true, "a rejected paste keeps the attempt pending");
+		const status = await f.service.completeLogin(pasted(f));
+		assert.equal(status.pending, false); assert.equal(status.error, null); assert(status.activeId);
+		assert.equal(f.requests.find((r) => r.url === tokenUrl)!.form!.get("redirect_uri"), redirect);
+		await assert.rejects(fetch(pasted(f)), "the listener closes once the paste wins");
+		await assert.rejects(f.service.completeLogin(pasted(f)), /callback/, "a completed attempt cannot be reused");
+	} finally { f.service.close(); }
+});
+
+test("a pasted callback is refused once the listener already finished the attempt, and without a pending attempt", async () => {
+	const f = fixture();
+	try {
+		await assert.rejects(f.service.completeLogin("http://127.0.0.1:1/auth/callback?state=x&code=y"), /callback/);
+		await f.service.login(); const address = pasted(f);
+		assert.equal((await f.callback()).status, 200);
+		await assert.rejects(f.service.completeLogin(address), /callback/);
+		await f.changed.promise;
+		assert.equal(f.requests.filter((r) => r.url === tokenUrl).length, 1);
 	} finally { f.service.close(); }
 });
 

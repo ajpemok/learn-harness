@@ -80,7 +80,7 @@ export function VisualOutputCard({
 	if (failed) {
 		return (
 			<div className="rounded-xl border bg-card p-4 text-card-foreground" data-testid="visual-card-failed">
-				<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+				<div className="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground">
 					Figure
 					<span className="rounded bg-red-500/15 px-1.5 py-0.5 text-red-500">failed</span>
 				</div>
@@ -124,20 +124,20 @@ export function VisualOutputCard({
 				/>
 			</div>
 			<div className="mt-2 flex items-center justify-between gap-2">
-				<div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Figure</div>
+				<div className="text-xs font-medium tracking-wide text-muted-foreground">Figure</div>
 				<div className="flex items-center gap-1.5">
 					{/* The invert affordance (owner round, 2026-10-07): the disc IS
 					    the half-filled contrast circle; the tooltip names it. */}
 					<Toggle
 						checked={inverted}
 						onChange={toggleInverted}
-						label="Invert figure brightness"
-						title="Invert colors"
+						label="Invert Figure Brightness"
+						title="Invert Colours"
 						discIcon={<InvertDiscIcon className="size-3" />}
 					/>
 					<button
 						type="button"
-						aria-label="Download figure as SVG"
+						aria-label="Download Figure as SVG"
 						title="Download as SVG"
 						onClick={() => downloadFile("figure.svg", result.svg, "image/svg+xml")}
 						data-testid="visual-download"
@@ -148,8 +148,8 @@ export function VisualOutputCard({
 					{overlay && (
 						<button
 							type="button"
-							aria-label="Open figure fullscreen"
-							title="Open fullscreen"
+							aria-label="Open Figure Fullscreen"
+							title="Open Fullscreen"
 							onClick={() => overlay.openFigure(result.svg, inverted)}
 							data-testid="visual-open"
 							className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"

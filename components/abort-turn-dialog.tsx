@@ -29,17 +29,17 @@ export type AbortMode = "turn" | "question" | "problem";
 
 const COPY: Record<AbortMode, { title: string; line: string; action: string }> = {
 	turn: {
-		title: "Abort this turn?",
+		title: "Abort This Turn?",
 		line: "The partial answer stays in the transcript.",
 		action: "Abort",
 	},
 	question: {
-		title: "Dismiss this question?",
+		title: "Dismiss This Question?",
 		line: "Skipped — the teacher moves on without it.",
 		action: "Dismiss",
 	},
 	problem: {
-		title: "Discard this problem?",
+		title: "Discard This Problem?",
 		line: "The problem is dropped — no solution is revealed.",
 		action: "Discard",
 	},

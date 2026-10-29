@@ -7,8 +7,36 @@
  */
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { spawnSync } from "node:child_process";
 import { emit, subscribe, type ServerEvent } from "../src/core/events.ts";
 import { eventsResponse } from "../src/server/events-stream.ts";
+
+it("shutdown closes every notification stream across module instances and clears their timers", () => {
+	const source = new URL("../src/server/events-stream.ts", import.meta.url).href;
+	const events = new URL("../src/core/events.ts", import.meta.url).href;
+	const child = spawnSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", `
+		import assert from 'node:assert/strict';
+		const { eventsResponse } = await import(${JSON.stringify(source)});
+		const { eventsResponse: anotherModule } = await import(${JSON.stringify(source + "?second-instance")});
+		const { emit } = await import(${JSON.stringify(events)});
+		const listeners = process.listenerCount('SIGTERM');
+		const timers = process.getActiveResourcesInfo().filter(x => x === 'Timeout').length;
+		const a = eventsResponse().body.getReader();
+		const b = anotherModule().body.getReader();
+		const cancelled = eventsResponse().body.getReader();
+		await cancelled.cancel();
+		assert.equal(process.listenerCount('SIGTERM'), listeners + 1);
+		process.emit('SIGTERM');
+		assert.equal((await a.read()).done, true);
+		assert.equal((await b.read()).done, true);
+		emit('chats-changed', {});
+		assert.equal(globalThis.__lhEventBus.size, 0);
+		process.emit('SIGINT');
+		assert.equal((await eventsResponse().body.getReader().read()).done, true);
+		assert.equal(process.getActiveResourcesInfo().filter(x => x === 'Timeout').length, timers);
+	`], { encoding: "utf8", timeout: 10_000 });
+	assert.equal(child.status, 0, child.stderr || String(child.error));
+});
 
 // ─── the bus ────────────────────────────────────────────────────────────────
 

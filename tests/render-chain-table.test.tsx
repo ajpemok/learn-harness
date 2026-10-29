@@ -120,7 +120,7 @@ describe("ChainTableBody — clusters (the outermost layer)", () => {
 		// chat1: chains c1 (a, b, c1) + solo (solo) → 4 member ids
 		assert.ok(html.includes(">4</span>"), "chat1's proposition count");
 		assert.ok(html.includes("2026-09-20"), "the newest-member date");
-		assert.ok(html.includes(">notes</span>"), "the notes kind tag");
+		assert.ok(html.includes(">Notes</span>"), "the notes kind tag");
 	});
 });
 
@@ -278,7 +278,7 @@ describe("ChainTableBody — the floating selection bar (never shifts layout)", 
 		assert.ok(html.includes('data-testid="chain-danger-divider"'));
 		const del = html.match(/<button[^>]*data-testid="chain-delete"[^>]*>/)?.[0] ?? "";
 		assert.match(del, /border-destructive\/50/); // the destructive pair
-		assert.match(del, /aria-label="Delete 3 selected nodes"/);
+		assert.match(del, /aria-label="Delete 3 Selected Nodes"/);
 		assert.ok(html.includes("lucide-trash-2"), "the trash icon");
 		// the fence is before Delete in the DOM (right end of the bar)
 		assert.ok(html.indexOf('chain-danger-divider"') < html.indexOf('chain-delete"'));
