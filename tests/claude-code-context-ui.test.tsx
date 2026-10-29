@@ -36,7 +36,7 @@ test("compact CLI context is numeric only; effective-window explanation appears 
 	const summary = document.querySelector<HTMLButtonElement>('[data-testid="stats-summary"]')!;
 	assert(!summary.textContent?.includes("window")); assert(!summary.textContent?.includes("budget"));
 	await act(async () => summary.click());
-	assert.match(document.querySelector('[data-testid="stats-detail"]')?.textContent ?? "", /Window reported by Claude Code; may be lower for auto-compaction\./);
+	assert.match(document.querySelector('[data-testid="stats-detail"]')?.textContent ?? "", /Window reported by Claude Code; may be lower for automatic compaction\./);
 	assert.equal(document.querySelector('[data-testid="stats-detail"] li > span:last-child > span:last-child')?.textContent, "CLI");
 	assert.equal(document.querySelector('[data-testid="stats-context"]')?.textContent, "42k / 200k");
 	await act(async () => render(null));

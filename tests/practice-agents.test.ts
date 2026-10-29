@@ -274,7 +274,7 @@ describe("persistent practice nudges", () => {
 
 	it("preserves the approved concluded-problem switch and unbounded structural repair in source and the effective default prompt", () => {
 		const approvedDifficulty = "3. **Difficulty** — from the last outcomes on this target: clean success, one notch up; success that needed hints, hold; a miss, one notch down and consider dropping a mode. Two missed concluded problems in a row on this target: switch targets for the next demand. Never switch away from an active problem because of the number of attempts.";
-		const approvedClassification = "Classify every miss: cue miss (nothing came), discrimination error (wrong candidate won), execution slip (right proposition, wrong run), careless, or structural (the retrieved proposition is itself wrong — a misconception). The first four are practice information. Structural misses call for minimal nudges toward repairing the misconception, not an immediate correction or re-teaching. Keep each nudge surgical; do not impose a one-line or one-attempt limit on the repair as a whole.";
+		const approvedClassification = "Classify every miss: cue miss (nothing came), discrimination error (wrong candidate won), execution slip (right proposition, wrong run), careless, or structural (the retrieved proposition is itself wrong — a misconception). The first four are practice information. Structural misses call for minimal nudges toward repairing the misconception, not an immediate correction or reteaching. Keep each nudge surgical; do not limit the repair as a whole to one line or one attempt.";
 		for (const text of [doctrine, composeInstructions("practice")]) {
 			const normalized = normalizeWhitespace(text);
 			assert.ok(normalized.includes(approvedDifficulty), "preserve the difficulty readout and exact approved switching rule");
@@ -287,7 +287,7 @@ describe("persistent practice nudges", () => {
 	});
 
 	it("preserves the approved misconception introduction without an affirmative one-line repair cap", () => {
-		const approvedIntroduction = "- **Not a teaching session.** You will find misconceptions. Address them with minimal, surgical nudges, over as many exchanges as needed. A practice session that drifts into re-teaching has stopped practicing.";
+		const approvedIntroduction = "- **Not a teaching session.** You will find misconceptions. Address them with minimal, surgical nudges, over as many exchanges as needed. A practice session that drifts into reteaching has stopped practising.";
 		for (const text of [doctrine, composeInstructions("practice")]) {
 			const normalized = normalizeWhitespace(text);
 			assert.ok(normalized.includes(approvedIntroduction), "preserve the exact approved introduction and the rest of the not-teaching bullet");
@@ -345,7 +345,7 @@ describe("practice prompt composition (own directory + the formatting appendix)"
 		// accuracy (prompt-refinement round, 2026-10-07): the felt-doubt bar —
 		// one law across every agent; the old round-10 pointer lived in the
 		// accuracy chunk, the mechanics now live in each agent's own sections
-		assert.match(prompt, /one confidently-delivered hallucination poisons that/);
+		assert.match(prompt, /one confidently delivered hallucination poisons that/);
 		assert.match(prompt, /The bar is the doubt itself/);
 		// practice's own fact-check law (the rarely-needed framing is dead)
 		assert.match(prompt, /grades the learner against a lie/);
@@ -355,7 +355,7 @@ describe("practice prompt composition (own directory + the formatting appendix)"
 		assert.match(prompt, /primary data/);
 		// the teacher composes the same shared chunks (one law)
 		const teacher = composeInstructions("teacher");
-		assert.match(teacher, /one confidently-delivered hallucination poisons that/);
+		assert.match(teacher, /one confidently delivered hallucination poisons that/);
 		assert.match(teacher, /Everything in this section deletes a default/);
 		assert.match(teacher, /The bar is the doubt itself/);
 		assert.match(teacher, /primary data/);
@@ -377,7 +377,7 @@ describe("practice prompt composition (own directory + the formatting appendix)"
 		const prober = composeInstructions("prober");
 		assert.match(prober, /Enter near the top, not the bottom/);
 		assert.match(prober, /Strands inform each other/);
-		assert.match(prober, /never descending into already-bracketed territory/);
+		assert.match(prober, /never descending into territory whose boundary is already clear/);
 		// the confidence + thinking signals are wired into question selection
 		assert.match(prober, /the verdict, his confidence, and his thinking field together set where the next question should sit/);
 	});

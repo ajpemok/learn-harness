@@ -46,22 +46,22 @@ export interface DemoBuilderOptions {
 	chatId?: string;
 }
 
-const INSTRUCTIONS = `You are a demo builder — a specialist sub-agent inside a learning application. You
+const INSTRUCTIONS = `You are a demo builder — a specialist helper agent inside a learning application. You
 receive a brief for ONE interactive teaching instrument and deliver a single self-contained HTML document
 that runs it. You never see the lesson; the brief is everything you know.
 
 Runtime contract (the document runs in a sandboxed iframe, sandbox="allow-scripts", opaque origin):
 - Single file. Vanilla JS + Canvas 2D or SVG. CDN imports (e.g. a plotting or maths library) are allowed
-  when they genuinely help — but prefer dependency-free; you own the failure if a CDN import fails.
+  when they genuinely help — but prefer a demo without dependencies; you own the failure if a CDN import fails.
 - NO localStorage, sessionStorage, or document.cookie — the sandbox makes them throw.
 - The parent sizes the iframe to the document height automatically; just build normal flowing layout.
   Make the demo fill the width and size its own height sensibly.
 
 Build quality:
 - The demo must directly serve the brief: every control named in the brief must exist and do the thing.
-- Controls need labels; sliders/inputs need current-value readouts. A learner should operate it unguided.
+- Controls need labels; sliders/inputs need readouts of their current values. A learner should operate it unguided.
 - Smooth enough interaction; requestAnimationFrame for animation, not setInterval when it matters.
-- Dark-mode neutral: pick a clean light background for the demo area so it reads on any card.
+- Use a clean light background for the demo area so it reads on any card.
 
 THE HOUSE RULE — never deliver untested:
 1. Call write_demo with the complete HTML document.
@@ -161,7 +161,7 @@ function formatRunResult(result: DemoRunResult): string {
 			result.probeResult !== undefined
 				? ` Probe result: ${JSON.stringify(result.probeResult) ?? "undefined"}.`
 				: "";
-		return `PASSED: no console errors, no uncaught errors, no failed requests.${probe} If you are satisfied, finish with your notes; otherwise keep improving and re-test.`;
+		return `PASSED: no console errors, no uncaught errors, no failed requests.${probe} If you are satisfied, finish with your notes; otherwise keep improving and test again.`;
 	}
 	const sections: string[] = [`FAILED: ${summarizeCounts(result)}.`];
 	if (result.consoleErrors.length > 0)
@@ -170,7 +170,7 @@ function formatRunResult(result: DemoRunResult): string {
 		sections.push(`Uncaught errors:\n${result.pageErrors.slice(0, 10).map((e) => `- ${e}`).join("\n")}`);
 	if (result.failedRequests.length > 0)
 		sections.push(`Failed requests:\n${result.failedRequests.slice(0, 10).map((r) => `- ${r}`).join("\n")}`);
-	sections.push("Fix the document (write_demo) and re-test (run_demo).");
+	sections.push("Fix the document (write_demo) and test again (run_demo).");
 	return sections.join("\n");
 }
 

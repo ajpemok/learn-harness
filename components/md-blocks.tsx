@@ -204,7 +204,7 @@ function MermaidInline({ chart }: { chart: string }) {
 					<Hint
 					// Full-screen overlay copy (tooltip wave) — "session view" was
 					// internal direction-speak for the same thing.
-					label="Open Full-Screen"
+					label="Open in Full Screen"
 					side="bottom"
 				>
 <button

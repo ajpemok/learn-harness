@@ -58,7 +58,7 @@ import { runSubmitAgent, healStringifiedArrays } from "./submit-agent.ts";
  *                    conclusions as premises. Stretches of one source
  *                    run SERIALLY (each extract reads every earlier
  *                    merge); tree-blind, FULLY TRUSTED — nothing
- *                    downstream re-checks it.
+ *                    downstream rechecks it.
  *   auditor (LLM)    never sees the source. Its job is IDENTITY: for each
  *                    NEW proposition, linkTo an existing graph node or
  *                    create — decided by EXPLORING the graph through
@@ -154,7 +154,7 @@ const propositionProps = {
 	}),
 	statement: Type.String({
 		description:
-			"One true, self-contained, world-facing core idea at full precision. Never about the " +
+			"One true, self-contained core idea about the subject at full precision. Never about the " +
 			'learner, the teacher, or the reading: not "the learner understands X" but "X". A misconception ' +
 			"enters as its TRUE correction.",
 	}),
@@ -412,7 +412,7 @@ The graph holds TRUE ideas about the world, nothing else — never anything abou
 teacher, or this reading: not "the learner understands X" but X. A misconception enters as its TRUE
 correction. Each statement is one self-contained idea at full precision.
 
-Extract the load-bearing ideas of the subject — what a reference on it would teach — not the full run
+Extract the essential ideas of the subject — what a reference on it would teach — not the full run
 of the discourse. An idea earns its place only when the source's arguments run through it — examples,
 notation glosses, and restatements that no argument needs are not core ideas. Every idea must stand
 alone for a reader who never saw this source: names and statements may not lean on the source's own
@@ -422,7 +422,7 @@ document is organised is not knowledge — drop it.
 When the prompt carries THE GRAPH SO FAR, you are continuing a source already partly extracted: build
 on it. Reference an existing idea by its id ("n_…") instead of restating it, and prefer chains that
 lean on established conclusions as premises — derive new material from what is already derived. Do
-not re-derive a conclusion the graph already holds unless the route is genuinely different.
+not repeat a derivation for a conclusion the graph already holds unless the route is genuinely different.
 
 SUBMIT with one submit_findings call: every NEW core idea with a short name and a precise statement,
 and every chain as premises + conclusion. A chain's premises and conclusion may be ids from this
@@ -454,7 +454,7 @@ export function sourceDigest(graph: DerivedGraph, sourceId: string): string {
 	lines.push("THE GRAPH SO FAR — everything already extracted from this source (reference these ids verbatim):");
 	for (const n of ours) lines.push(`  ${n.id} | ${n.name} | ${n.statement.replace(/\s+/g, " ")}`);
 	if (ourChains.length > 0) {
-		lines.push("DERIVATIONS ALREADY RECORDED (build on these; do not re-derive them):");
+		lines.push("DERIVATIONS ALREADY RECORDED (build on these; do not derive them again):");
 		for (const c of ourChains) {
 			const names = c.premises.map((p) => nameOf.get(p) ?? p).join(" ∧ ");
 			lines.push(`  [${c.premises.join(" + ")} ⇒ ${c.conclusion}]  ${names} ⇒ ${nameOf.get(c.conclusion) ?? c.conclusion}`);
@@ -536,7 +536,7 @@ function runNotesExtractor(
 
 const AUDITOR_INSTRUCTIONS = `You are the linking stage of a learning application's extraction pipeline. An extractor
 has read a source (a teaching session, or the author's personal notes) and reported findings: propositions and
-their reasoning chains. You NEVER see the source itself — the extractor is fully trusted, and you do not re-check
+their reasoning chains. You NEVER see the source itself — the extractor is fully trusted, and you do not recheck
 its work. Your job is IDENTITY: connecting those findings to the CURRENT knowledge graph, preparing the merge.
 
 You explore the graph through your tools: list_sessions, list_propositions, and find (glob over names +
@@ -545,13 +545,13 @@ sessions — and your job is done as soon as you have SEEN the plausible candida
 
 1. GROUND yourself first: call list_sessions ONCE. This one call shows the entire space — every session that ever
    contributed propositions, and how many. Now you know the extent of what you are searching; nothing is hidden.
-2. READ the plausibly-related sessions: for each session whose topic could overlap these findings, call
+2. READ the plausibly related sessions: for each session whose topic could overlap these findings, call
    list_propositions — every proposition born there, with full statement text. A few calls and you have read
    every realistic identity candidate in the graph.
 3. find is your targeted sweep: use it for phrasings, synonyms, and neighboring ideas the session reads made you
    wonder about — its hits point back at sessions you can read whole.
-4. SUBMIT. Once every plausibly-related session has been read (and stray finds come back empty), you are DONE.
-   Do not re-search ground you have already seen; more patterns over the same nodes are wasted work.
+4. SUBMIT. Once every plausibly related session has been read (and stray finds come back empty), you are DONE.
+   Do not search the same ground again; more patterns over the same nodes are wasted work.
 
 IDENTITY — links, per proposition:
 - For each proposition: does an EXISTING node — one you have now SEEN — already state this same proposition?

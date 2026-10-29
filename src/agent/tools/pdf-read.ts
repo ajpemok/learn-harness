@@ -99,7 +99,7 @@ export function createPdfReadTools(dir: string): Record<string, AgentTool<any>> 
 			label: "web_fetch_pdf",
 			description:
 				"Download a PDF from the web and triage it: returns its local path, page count, size class " +
-				"(short ≤10 pages, medium ≤40, long), and flagged (math/image-heavy) pages. " +
+				"(short ≤10 pages, medium ≤40, long), and flagged pages (those with substantial maths or many images). " +
 				"Then read it with pdf_extract / pdf_search. Use when web_fetch reports a URL is a PDF.",
 			parameters: pdfFetchInput,
 			execute: serverExecute("web_fetch_pdf", pdfFetchInput, async ({ url }): Promise<PdfFetchSummary | string> => {
@@ -156,7 +156,7 @@ export function createPdfReadTools(dir: string): Record<string, AgentTool<any>> 
 			name: "pdf_info",
 			label: "pdf_info",
 			description:
-				"Triage a downloaded PDF: page count plus per-page signals (text_length, image_count, math_density).",
+				"Triage a downloaded PDF: page count plus signals for each page (text_length, image_count, math_density).",
 			parameters: pdfPathInput,
 			execute: serverExecute("pdf_info", pdfPathInput, async ({ path: filePath }) => {
 				const scoped = scopedPath(dir, filePath);

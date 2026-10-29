@@ -28,6 +28,11 @@ Runtime credentials, learning data, private hostnames and deployment inventories
 Prefer upstream behaviour for model admission, billing disclosure, question authority, persistence and rendering.
 Apply our wording and presentation preferences around those behaviours.
 Keep shared writing guidance at the production model boundary so new provider paths receive it without duplicating prompts.
+Use hyphens only for established spellings, APA convention or to prevent misreading.
+Rewrite invented compound labels as ordinary phrases, and retain the wording changes in built-in prompts when merging upstream.
+For example, use "situations that suggest the wrong method" and "targets least recently active" rather than joining each phrase with hyphens.
+Retain correct forms such as "sign-in" and "self-assessment", and preserve code, identifiers, filenames and quotations exactly.
+The [APA hyphenation principles](https://apastyle.apa.org/style-grammar-guidelines/spelling-hyphenation/hyphenation) explain the distinction between dictionary spellings and temporary compounds.
 Retain shutdown cancellation for discovery and queued credential refreshes; closing providers only on process exit can leave Next waiting for their HTTP requests.
 
 ## Intentional Conflict Resolutions: 0.4.0

@@ -45,7 +45,7 @@ export function proberGraphTools(ctx: GraphToolContext): Record<string, AgentToo
 			name: "list_sessions",
 			label: "list_sessions",
 			description:
-				"List the sessions of the learner's persistent knowledge graph — every chat or imported-notes file that ever contributed a proposition, most recent first. The map is organized into birth-session clusters (propositions grouped by the session they were first learned in), and session names are those clusters' labels. " +
+				"List the sessions of the learner's persistent knowledge graph — every chat or file of imported notes that ever contributed a proposition, most recent first. The map is organised into clusters by session (propositions grouped by the session they were first learned in), and session names are those clusters' labels. " +
 				"Each line: the session's name, kind (chat/file), how many propositions were born in it, its dates, and its id — use that id with list_propositions. " +
 				"Reading this first shows what he has already covered and when, before you probe anything.",
 			parameters: listSessionsInput,
@@ -63,7 +63,7 @@ export function proberGraphTools(ctx: GraphToolContext): Record<string, AgentToo
 			name: "list_propositions",
 			label: "list_propositions",
 			description:
-				"List the propositions BORN in one knowledge-graph session — what was covered there. " +
+				"List the propositions BORN in one session of the knowledge graph — what was covered there. " +
 				"Names only — no statement text, no session contents (owner ruling 2026-09-23: the map's ORGANIZATION is your business, its prose is not).",
 			parameters: listPropositionsInput,
 			execute: serverExecute("list_propositions", listPropositionsInput, async ({ session }): Promise<string> => {
@@ -150,7 +150,7 @@ export function auditorGraphTools(ctx: GraphToolContext): Record<string, AgentTo
 			name: "list_sessions",
 			label: "list_sessions",
 			description:
-				"List the knowledge graph's birth sessions — every chat or imported-notes file that ever contributed a proposition. " +
+				"List the knowledge graph's birth sessions — every chat or file of imported notes that ever contributed a proposition. " +
 				"Each line: name, kind, proposition count, id. Use the id with list_propositions to see what a session covered.",
 			parameters: Type.Object({}),
 			execute: serverExecute("list_sessions", Type.Object({}), async (): Promise<string> => {
@@ -164,7 +164,7 @@ export function auditorGraphTools(ctx: GraphToolContext): Record<string, AgentTo
 			name: "list_propositions",
 			label: "list_propositions",
 			description:
-				"List the propositions BORN in one session, with FULL statement text — the content-level view for identity work " +
+				"List the propositions BORN in one session, with FULL statement text — the statements used for identity work " +
 				"(deciding whether a new proposition is really one of these).",
 			parameters: listPropositionsInput,
 			execute: serverExecute("list_propositions", listPropositionsInput, async ({ session }): Promise<string> => {

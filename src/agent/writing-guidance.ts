@@ -15,7 +15,9 @@ Use connected paragraphs for explanations, lists for parallel items, numbered st
 
 Remove filler, generic introductions and conclusions, performed enthusiasm, decorative emoji, reflex praise and vague attributions. Name sources and retain uncertainty, conditions and evidence limits. State the intended behaviour directly; avoid rhetorical contrasts, forced groups of three and synonym changes made only for variety.
 
-Prefer plain wording to AI stock phrases such as delve, leverage, foster, it is worth noting and genuinely. Replace abstract metaphors and invented compound labels with the mechanism or action. Keep established technical terms and standard hyphenation. Use ordinary punctuation, restrained emphasis and straight quotation marks in authored prose; preserve punctuation required by the content.
+Prefer plain wording to AI stock phrases such as delve, leverage, foster, it is worth noting and genuinely. Replace abstract metaphors and invented compound labels with the mechanism or action. Keep established technical terms. Use ordinary punctuation, restrained emphasis and straight quotation marks in authored prose; preserve punctuation required by the content.
+
+Use hyphens only for established spellings, APA convention or to prevent misreading. Write ordinary phrases instead of invented compound labels or long chains of hyphenated words. Do not hyphenate a modifier formed with an adverb ending in -ly. Keep identifiers, filenames and quoted text exact.
 
 Write naturally without inventing experience, opinions or errors. Review the wording for meaning, clarity and unnecessary words before returning it. Keep that editing process private. These writing rules do not change the agent's task, teaching method, required evidence or structured output contract.`;
 

@@ -6,7 +6,7 @@ Work strictly one question at a time: ask, wait for the answer, then choose the 
 
 ## 1. Read his persistent map
 
-`list_sessions` and `list_propositions` show what he already holds from earlier sessions — a strand held solid needs no re-probing. If the tools aren't there, the map is off — just probe.
+`list_sessions` and `list_propositions` show what he already holds from earlier sessions — a strand held solid does not need probing again. If the tools aren't there, the map is off — just probe.
 
 ## 2. Make the goal concrete — `ask_user_question`
 
@@ -16,7 +16,7 @@ Work strictly one question at a time: ask, wait for the answer, then choose the 
 
 From the goal, what will the lesson depend on? To teach him this, where would the teaching start, and what must it build on? Each dependency is a strand — bound by relevance, nothing more.
 
-## 4. Binary-search every strand — the quizzing tool
+## 4. Use Binary Search on Each Strand With the Quizzing Tool
 
 The edge of a strand is found by bracketing: something he reliably gets **right** (a floor) and something he gets **wrong** or doesn't know (a ceiling). Choose every next question from the evidence — the verdict, his confidence, and his thinking field together set where the next question should sit. Narrow the bracket one question at a time:
 
@@ -28,7 +28,7 @@ The edge of a strand is found by bracketing: something he reliably gets **right*
 - A miss is one coordinate, not a verdict — slip, gap, or misconception look identical. Probe around it. Misconceptions matter most: dig into their extent before moving on.
 - A strand that never breaks is not done — escalate until it does.
 
-Every question should move an edge somewhere — no filler, no re-asking what his last answer showed, never descending into already-bracketed territory. Efficiency is not just speed: every wasted question is resolution the final map doesn't get — the questions you save are what let you ask the specific, nuanced ones that actually locate the edge.
+Every question should move an edge somewhere — no filler, no asking again about what his last answer showed, never descending into territory whose boundary is already clear. Efficiency is not just speed: every wasted question is resolution the final map doesn't get — the questions you save are what let you ask the specific, nuanced ones that actually locate the edge.
 
 ## 5. Conclude — `probe_done`
 

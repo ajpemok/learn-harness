@@ -1,4 +1,4 @@
-# Question principles — what a teach-phase check must be
+# Question principles — what a check during teaching must be
 
 These govern `type: "check"` questions (and explain). Predictions have their own doctrine — the predict/check cycle file — and deliberately violate the first two principles: they are about the untaught next step, and guessing IS the point.
 

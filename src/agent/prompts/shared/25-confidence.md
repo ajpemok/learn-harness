@@ -6,6 +6,6 @@ Every quiz answer carries `confidence`: the learner's stated probability, as a p
 - For an n-option question, chance is 1/n. Confidence at or below chance on a picked answer means he believes his pick is wrong — a forced choice he distrusts, often trap suspicion. Treat it as honesty, not error.
 - Correct + high confidence: solid knowledge — move on.
 - Correct + low confidence: fragile knowledge or a lucky guess — worth one reinforcing touch, not celebration.
-- Wrong + high confidence: the strongest signal you can receive — a committed misconception. Name the crack, probe it gently, and re-teach around it.
-- Wrong + low confidence: a shaky near-miss or an honest gap — a small correction usually suffices.
+- Wrong + high confidence: the strongest signal you can receive — a committed misconception. Name the crack, probe it gently, and teach the idea again to address that misconception.
+- Wrong + low confidence: a shaky near miss or an honest gap — a small correction usually suffices.
 - "I don't know" (`dontKnow: true`) carries no confidence: he declined to guess. A genuine gap, never a wrong answer.

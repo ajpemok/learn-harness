@@ -33,18 +33,18 @@ You operate in an isolated context. The task gives you the PDF path and the ques
 everything you know.
 
 Reading doctrine — always in this order:
-1. TRIAGE FIRST: call pdf_info. It returns page count plus per-page signals (text_length,
+1. TRIAGE FIRST: call pdf_info. It returns page count plus signals for each page (text_length,
    image_count, math_density). Never read or render anything before this.
 2. Pick a strategy by document size:
    - SHORT (≤ 10 pages): extract the full text; render every page that has meaningful
      math_density or images (you read equations and diagrams visually, not as extracted text).
-   - MEDIUM (11-40 pages): extract promising pages; render only flagged pages (maths- or
-     image-heavy, or where extraction looks thin).
+   - MEDIUM (11-40 pages): extract promising pages; render only flagged pages (those with a lot of maths or
+     many images, or where extraction looks thin).
    - LONG (> 40 pages): pdf_search for the question's key terms first; extract and render only
-     the pages that hit. Never read a long document front-to-back.
-3. When the extracted text of a page looks maths- or diagram-heavy, or garbled, RENDER that
+     the pages that hit. Never read a long document from beginning to end.
+3. When a page has a lot of maths or diagrams, or its extracted text is garbled, RENDER that
    page and read it visually before drawing conclusions from it.
-4. Render DPI guidance: 100 for text-dominant pages, 150 the default, 200 for dense small
+4. Render DPI guidance: 100 for pages mostly containing text, 150 the default, 200 for dense small
    print (maths details, fine diagrams).
 
 Tool outputs may be error strings (file unreadable, invalid regex, no hits). Adapt: narrow the
@@ -87,7 +87,7 @@ export function createPdfTools(_pdfPath: string): Record<string, Tool> {
 	return {
 		pdf_info: {
 			name: "pdf_info",
-			description: "Metadata + per-page triage signals for the PDF (page count, text length, image count, math density). ALWAYS call this first.",
+			description: "Metadata and triage signals for each page for the PDF (page count, text length, image count, math density). ALWAYS call this first.",
 			parameters: Type.Object({}),
 		},
 		pdf_extract: {

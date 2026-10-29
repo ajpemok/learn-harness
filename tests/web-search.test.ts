@@ -110,7 +110,7 @@ describe("web_search on the injected port (web.ts)", () => {
 
 describe("keyless researcher loop", () => {
 	it("sends the exact approved missing-credentials guidance in the researcher system prompt", async () => {
-		const approved = "If web_search reports that search is unavailable because credentials are missing, do not retry it with different queries. Use web_fetch when you have source URLs, and continue with any other available sources. If the missing search capability materially limits your work, state the limitation and the missing-key setup needed in your brief. Never invent search results or sources.";
+		const approved = "If web_search reports that search is unavailable because credentials are missing, do not retry it with different queries. Use web_fetch when you have source URLs, and continue with any other available sources. If the missing search capability materially limits your work, state the limitation and the API key setup needed in your brief. Never invent search results or sources.";
 		const faux = createFauxCore({});
 		faux.setResponses([(context) => {
 			const system = context.messages.find((m) => m.role === "system");
