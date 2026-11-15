@@ -44,5 +44,5 @@ COPY --from=build --chown=node:node /app/scripts/smoke-shutdown-runtime.mjs ./sc
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
-    CMD node -e "const headers=process.env.LH_PUBLIC_ORIGIN?{host:new URL(process.env.LH_PUBLIC_ORIGIN).host}:{};fetch('http://127.0.0.1:'+process.env.PORT+'/api/health',{headers}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+    CMD node -e "const headers=process.env.LH_PUBLIC_ORIGIN?{host:new URL(process.env.LH_PUBLIC_ORIGIN).host}:{};const request=require('node:http').get('http://127.0.0.1:'+process.env.PORT+'/api/health',{headers},response=>{response.resume();process.exitCode=response.statusCode===200?0:1});request.setTimeout(4000,()=>request.destroy());request.on('error',()=>{process.exitCode=1})"
 CMD ["node", "server.js"]
