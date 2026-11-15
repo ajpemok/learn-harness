@@ -8,6 +8,8 @@ import { readTool } from "../src/agent/tools/read.ts";
 import { lsTool } from "../src/agent/tools/ls.ts";
 import { findTool } from "../src/agent/tools/find.ts";
 import { grepTool } from "../src/agent/tools/grep.ts";
+import { fileAccessPolicy, resolvePolicy, setFileAccessPolicy } from "../src/agent/tools/file-access.ts";
+import { sourceSearchRoots } from "../src/agent/tools/fs-shared.ts";
 
 test("server study files cannot escape through absolute paths, traversal or symlinked parents", async () => {
 	const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "lh-study-root-"));
@@ -42,6 +44,54 @@ test("server study files cannot escape through absolute paths, traversal or syml
 	} finally {
 		if (previous === undefined) delete process.env.LH_SOURCES_DIR;
 		else process.env.LH_SOURCES_DIR = previous;
+		await fs.rm(scratch, { recursive: true, force: true });
+	}
+});
+
+test("headless listings and searches intersect optional folders without widening the study boundary", async () => {
+	const scratch = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "lh-study-policy-")));
+	const root = path.join(scratch, "sources");
+	const course = path.join(root, "course");
+	const outside = path.join(scratch, "outside");
+	const previousRoot = process.env.LH_SOURCES_DIR;
+	const previousPolicy = fileAccessPolicy();
+	const text = async (tool: typeof lsTool | typeof findTool | typeof grepTool, input: Record<string, string>) => {
+		const result = await tool.execute!("headless-policy", input as never);
+		return result.content.map(part => part.type === "text" ? part.text : "").join("\n");
+	};
+	try {
+		await fs.mkdir(course, { recursive: true });
+		await fs.mkdir(outside);
+		await fs.writeFile(path.join(course, "notes.txt"), "STUDY_MARKER");
+		await fs.writeFile(path.join(outside, "secret.txt"), "OUTSIDE_MARKER");
+		await fs.symlink(outside, path.join(root, "escape"), process.platform === "win32" ? "junction" : "dir");
+		process.env.LH_SOURCES_DIR = root;
+		setFileAccessPolicy(() => ({ restricted: false, folders: [outside] }));
+		const listing = await text(lsTool, {});
+		assert.match(listing, /course\//);
+		assert.doesNotMatch(listing, /Allowed folders:|escape/);
+		assert.match(await text(findTool, { pattern: "*.txt" }), /notes.txt/);
+		assert.doesNotMatch(await text(grepTool, { pattern: "MARKER" }), /OUTSIDE_MARKER/);
+		for (const [folders, expected] of [[[scratch], root], [[course], course]] as const) {
+			setFileAccessPolicy(() => ({ restricted: true, folders }));
+			assert.deepEqual(sourceSearchRoots(undefined, resolvePolicy()).roots, [expected]);
+			const roots = await text(lsTool, {});
+			assert.match(roots, /Allowed folders:/);
+			assert.ok(roots.includes(expected));
+			assert.doesNotMatch(roots, /escape/);
+			assert.match(await text(grepTool, { pattern: "STUDY_MARKER" }), /STUDY_MARKER/);
+			await assert.rejects(lsTool.execute!("escape", { path: "escape" }), /study folder/);
+		}
+		for (const folders of [[outside], [], [path.join(scratch, "missing")]]) {
+			setFileAccessPolicy(() => ({ restricted: true, folders }));
+			await assert.rejects(lsTool.execute!("closed", {}), /no accessible allowed folders/);
+			await assert.rejects(findTool.execute!("closed", { pattern: "*" }), /no accessible allowed folders/);
+			await assert.rejects(grepTool.execute!("closed", { pattern: "MARKER" }), /no accessible allowed folders/);
+		}
+	} finally {
+		setFileAccessPolicy(() => previousPolicy);
+		if (previousRoot === undefined) delete process.env.LH_SOURCES_DIR;
+		else process.env.LH_SOURCES_DIR = previousRoot;
 		await fs.rm(scratch, { recursive: true, force: true });
 	}
 });

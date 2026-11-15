@@ -9,6 +9,8 @@ Do not replace a conflicted file wholesale with either side without checking the
 - Previous upstream baseline: `3dd52110bbcbcba81645453ce0a8fdc230594c47` (0.3.9).
 - Saved local changes before the 0.4.0 merge: `2a64653`.
 - Upstream 0.4.0: `dc4c398d5167865b84b0ccb3ec809eb88bf8f65f`.
+- Fork before the 0.6.1 merge: `14a61eb8d57946ff17ca6b26634fae6ee2012225`.
+- Upstream 0.6.1: `cb25c8e49b85eed9e78315584731cad73a0118a6`.
 - Upstream repository: <https://github.com/amosblomqvist/learnharness>.
 
 The local `upstream` remote points to that repository.
@@ -49,6 +51,21 @@ The upstream `tests/claude-code-usage.test.tsx` caption assertion also deliberat
 An automatic merge is not evidence that local behaviour survived.
 Review the upstream diff for new production model paths, prompt composition, source-file reads and replacement UI components.
 Check the intentional differences above even when Git reports no conflict.
+
+## Intentional Conflict Resolutions: 0.6.1
+
+| File and Landmark | Resolution and Validation |
+| --- | --- |
+| `src/agent/models.ts`, `piEngineForSpec().streamFn` | Keep per-operation cache retention and custom-provider revalidation. Prepare writing context once and pass it through every provider branch. Verify writing guidance, custom-provider lifecycle and cache-retention tests. |
+| `instrumentation.ts`, `register` | Register shutdown cleanup before initialising plugins. Retain upstream plugin failure reporting and basic application access. |
+| `src/agent/tools/fs-shared.ts`, `resolveSourcePath` and `sourceSearchRoots`; `file-access.ts`, `guardSourcePath`; `ls.ts` | Compose mandatory study-folder confinement, sensitive-location denials and optional allowed folders. Intersect roots for restricted searches; never fall back to home on a headless server. Check every listed entry before `stat`, independently of the optional restriction. Verify headless-source and upstream file-access tests. |
+| `src/server/desktop-access.ts`, `subscriptionRequestOrigin` and `browserAPIRefusal` | Keep the shared upstream request guard, including streamed plugin documents. Validate the exact configured HTTPS origin and preserved host, require explicit host admission and ignore forwarded headers. Verify headless-origin, browser API and plugin-document access tests. |
+| `components/settings/chatgpt-connection.tsx`, `finishSignIn` and `AccountDialog` | Retain remote callback completion, generation ownership and consent handling alongside upstream interaction layers and dialog focus. Verify connection UI and authentication tests. |
+| `components/`, `app/layout.tsx`, `src/core/keyboard.ts` | Keep upstream component owners, image/plugin support, themes, focus and source organisation. Apply the fork's copy and label casing to the resulting controls. Keep the owner wordmark and reduced motion. Render tests follow current component behaviour. |
+| `scripts/smoke-server.mjs`, `main` | Retain upstream plugin and relocated-payload probes. Run shutdown verification against the selected standalone directory, including isolated mode. Windows cannot establish POSIX shutdown. |
+
+The initial focused merge check passed 66 tests covering callbacks, headless sources/origins and writing guidance.
+Final qualification also requires the follow-up compatibility removals, packaging repairs and full checks.
 
 ## Future Updates
 
