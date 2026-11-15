@@ -90,7 +90,7 @@ describe("DeleteNodeBody — the minimal screen (owner, 2026-09-30)", () => {
 			{ id: "newton", name: "Newton's second law" },
 			{ id: "hook", name: "Hooke's law" },
 		]);
-		assert.match(three, /Delete 3 nodes\?/); // plural title, NODES
+		assert.match(three, /Delete 3 Nodes\?/); // Plural title.
 		assert.match(three, /data-testid="node-names-code"/);
 		assert.match(three, /Kepler&#x27;s three laws, Newton&#x27;s second law, Hooke&#x27;s law/);
 		assert.ok(!three.includes('data-testid="node-name-code"'), "the single-name testid is gone in multi");
@@ -99,7 +99,7 @@ describe("DeleteNodeBody — the minimal screen (owner, 2026-09-30)", () => {
 
 		// the cap: 10 names render 8 + ", and 2 more"
 		const ten = bodyAt(Array.from({ length: 10 }, (_, i) => ({ id: `n${i}`, name: `Prop ${i}` })));
-		assert.match(ten, /Delete 10 nodes\?/);
+		assert.match(ten, /Delete 10 Nodes\?/);
 		assert.match(ten, /Prop 7/); // the 8th name still listed
 		assert.doesNotMatch(ten, /Prop 8</); // the 9th is not
 		assert.match(ten, /, and 2 more/);

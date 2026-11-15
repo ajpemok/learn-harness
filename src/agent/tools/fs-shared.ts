@@ -190,8 +190,8 @@ export function resolveSourcePath(p?: string, policy?: ResolvedFileAccessPolicy)
 	return guardSourcePath(checkedSourcePath(resolved, sourcePathCheck(home)), policy);
 }
 
-/** Explicit paths retain their HOME meaning. Only an omitted directory in
- * restricted mode selects the union of available roots, never home. */
+/** Explicit paths use the active desktop or headless base. Omitted restricted
+ * searches use the effective allowed roots, without a home fallback. */
 export function sourceSearchRoots(p?: string, policy: ResolvedFileAccessPolicy = resolvePolicy()): { roots: string[]; notices: string[]; multiRoot: boolean } {
 	if (p || !policy.restricted) return { roots: [resolveSourcePath(p, policy)], notices: [], multiRoot: false };
 	const notices = policy.unavailable.length ? [`Skipped ${policy.unavailable.length} unavailable allowed folder(s). Check File access settings`] : [];

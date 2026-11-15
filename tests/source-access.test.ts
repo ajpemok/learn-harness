@@ -104,8 +104,8 @@ describe("source access: configured credentials only", () => {
 		for (const file of ["home/notes/topic.md", "home/..notes/also.md", "home/.claudette/ok.md", "unrelated/.ssh/notes.md", "keyfiles/custom-keys.json.backup-not-managed", `keyfiles/other.json.tmp-${uuid}`, "keyfiles/custom-keys.json.tmp-not-a-uuid", `unrelated/custom-keys.json.tmp-${uuid}`, "private/logs/main.log"]) {
 			assert.match(await text(readTool, { path: path.join(root, file) }), /ordinary/);
 		}
-		assert.match(await text(lsTool, { path: path.dirname(auth) }), /chatgpt-credentials\.json/);
-		assert.match(await text(lsTool, { path: home }), /\.ssh\//);
+		assert.doesNotMatch(await text(lsTool, { path: path.dirname(auth) }), /chatgpt-credentials\.json/);
+		assert.doesNotMatch(await text(lsTool, { path: home }), /\.ssh\//);
 	});
 
 	it("root-wide discovery omits credential targets, temp files, transcripts and dotenv contents", async () => {

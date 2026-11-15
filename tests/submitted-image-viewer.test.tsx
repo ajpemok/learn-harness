@@ -16,13 +16,13 @@ test("raster images reuse the figure viewport without SVG markup, white backing 
 	const html = renderToStaticMarkup(<InteractionLayersProvider><MermaidOverlay image={{ src: source, width: 2000, height: 1375 }} onClose={() => {}} /></InteractionLayersProvider>);
 	const { document } = parseHTML(html);
 	const overlay = document.querySelector('[data-testid="mermaid-overlay"]')!;
-	assert.equal(overlay.getAttribute("aria-label"), "Image focus");
+	assert.equal(overlay.getAttribute("aria-label"), "Image Focus");
 	assert.equal(overlay.querySelector("img")?.getAttribute("src"), source);
 	assert.equal(overlay.querySelector("img")?.getAttribute("draggable"), "false");
 	assert.equal(overlay.querySelector("svg image"), null);
 	assert.equal(overlay.querySelector("[data-lh-overlay-chart]"), null);
-	assert.ok(overlay.querySelector('[aria-label="Zoom in"]'));
-	assert.ok(overlay.querySelector('[aria-label="Fit image to view"]'));
+	assert.ok(overlay.querySelector('[aria-label="Zoom In"]'));
+	assert.ok(overlay.querySelector('[aria-label="Fit Image to View"]'));
 	assert.doesNotMatch(html, /filter:invert|bg-white/);
 });
 

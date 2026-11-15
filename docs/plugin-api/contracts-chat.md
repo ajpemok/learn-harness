@@ -819,7 +819,6 @@ export interface SideChatThread {
     open: boolean;
     createdAt: string;
     messages: SideChatMessage[];
-    contextSnapshot?: SideChatMessage[];
 }
 ```
 
@@ -832,7 +831,6 @@ export interface SideChatThread {
 - [open](#sidechatthread-open)
 - [createdAt](#sidechatthread-createdat)
 - [messages](#sidechatthread-messages)
-- [contextSnapshot](#sidechatthread-contextsnapshot)
 
 ### SideChatThread id
 
@@ -864,15 +862,6 @@ createdAt: string;
 
 ```ts
 messages: SideChatMessage[];
-```
-
-### SideChatThread contextSnapshot
-
-Compatibility snapshot retained when reading records that use a one-shot
-context cutoff. Current delivery uses immutable native update entries.
-
-```ts
-contextSnapshot?: SideChatMessage[];
 ```
 
 ## TurnUsage

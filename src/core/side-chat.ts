@@ -129,16 +129,15 @@ function replyState(message: SideChatMessage): string {
 
 /** Delivery watermarks live IN immutable native entries, not in a mutable
  * UI-thread cutoff. Recording text and its watermark is therefore one atomic
- * write. Full native history survives compaction, so these stay recoverable.
- * Legacy one-shot markers seed the same ledger without rewriting them. */
+ * write. Full native history survives compaction, so these stay recoverable. */
 function sideDeliveryLedger(messages: readonly LhMessage[]) {
 	const delivered = new Map<string, Map<string, SideChatMessage>>();
 	const revisions = new Map<string, number>();
 	for (const message of messages) {
 		if (message.role !== "custom" || message.customType !== "side-question" || !message.details || typeof message.details !== "object") continue;
-		const details = message.details as { threadId?: unknown; updates?: unknown; snapshot?: unknown };
+		const details = message.details as { threadId?: unknown; updates?: unknown };
 		if (typeof details.threadId !== "string") continue;
-		const updates = details.updates ?? details.snapshot;
+		const updates = details.updates;
 		if (!Array.isArray(updates)) continue;
 		const thread = delivered.get(details.threadId) ?? new Map<string, SideChatMessage>();
 		for (const update of updates) {

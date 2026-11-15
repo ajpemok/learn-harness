@@ -446,7 +446,7 @@ describe("Practice settings API and effective prompt loading", () => {
 				assert.equal(row.enabled, on);
 				assert.equal(row.overrideText, text);
 				const expected = effectivePromptSegments("practice", {}).map((s) => (on && s.path === segment ? text : s.sourceText).trim()).filter(Boolean).join("\n\n---\n\n");
-				assert.equal(loaded(), expected, "actual composed instructions replace exactly one source fragment");
+				assert.equal(loaded(), withWritingGuidance(expected), "actual composed instructions replace exactly one source fragment and retain shared writing guidance");
 				for (const kind of ["teacher", "prober"] as const) {
 					assert.equal(teacherAgent.composeInstructions(kind, readSettingsRecord()?.agent?.prompts ?? {}), defaults[kind]);
 				}

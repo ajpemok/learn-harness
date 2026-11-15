@@ -33,7 +33,7 @@ const MAX_LINES = 2000;
 const MAX_BYTES = 50 * 1024;
 
 const readInput = Type.Object({
-	path: Type.String({ minLength: 1, description: "Path to the file to read (relative or absolute)" }),
+	path: Type.String({ minLength: 1, description: "Path to the file to read. Relative paths start in the study folder on headless servers and at home on desktop. Absolute paths must satisfy the source boundaries." }),
 	offset: Type.Optional(Type.Integer({ minimum: 1, description: "Line number to start reading from (1-indexed)" })),
 	limit: Type.Optional(Type.Integer({ minimum: 1, description: "Maximum number of lines to read" })),
 });

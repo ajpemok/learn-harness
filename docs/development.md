@@ -138,7 +138,7 @@ The POSIX signal checks run on Linux/macOS; Windows reports that limitation expl
 
 ## ChatGPT Model Metadata
 
-ChatGPT model availability comes from the selected account's discovery response. `src/agent/chatgpt-models.ts` supplies verified subscription-only Terra metadata while Pi SDK 1.4.0 lacks that entry. The SDK wins when it supplies the model, and the account must still advertise it. This compatibility entry does not add API-key routing or grant account access. Its limits and supported reasoning levels cite OpenAI's API specification in the source.
+ChatGPT models require both SDK metadata and an advertisement from the selected account. Models missing from either source remain unavailable. Model discovery does not add API-key routing or grant account access.
 
 ## Writing Guidance
 

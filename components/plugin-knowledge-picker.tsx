@@ -29,7 +29,7 @@ function PanePicker({ origin, openingLease, onClose, children }: {
 	const entered = useRef(false);
 	const focusInitial = useCallback(() => {
 		if (controller.getTopLayer()?.id !== PICKER_LAYER) return;
-		const search = root.current?.querySelector<HTMLElement>('input[aria-label="Search nodes"]');
+		const search = root.current?.querySelector<HTMLElement>('[data-testid="chain-table-search"]');
 		if (search && controller.isElementEligible(search)) search.focus({ preventScroll: true });
 	}, [controller]);
 	// Snapshot authority before registration cleanup; covered/expired views do

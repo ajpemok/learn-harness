@@ -156,9 +156,6 @@ export interface SideChatThread {
 	open: boolean;
 	createdAt: string;
 	messages: SideChatMessage[];
-	/** Compatibility snapshot retained when reading records that use a one-shot
-	 * context cutoff. Current delivery uses immutable native update entries. */
-	contextSnapshot?: SideChatMessage[];
 }
 
 /** Persisted token accounting for one model call. Undefined means the

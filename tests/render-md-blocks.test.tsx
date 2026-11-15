@@ -104,7 +104,7 @@ describe("md-blocks — tables", () => {
 			assert.equal(table.querySelector("strong")?.textContent, "Bold");
 			assert.equal(table.querySelector("annotation")?.textContent, "x^2");
 			assert.ok(table.textContent.includes("Guide"), "link text survives the normal link-safety renderer");
-			assert.equal(wrapper.querySelectorAll('button[aria-label="Copy table"]').length, 1);
+			assert.equal(wrapper.querySelectorAll('button[aria-label="Copy Table"]').length, 1);
 		}
 	});
 

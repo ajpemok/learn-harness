@@ -444,7 +444,7 @@ export function ChainTableBody({
 								{onOrganizationChange && group.birth && group.kind !== null
 									? <EditableSourceName name={group.label ?? ""} muted={empty} onSave={(name) => onOrganizationChange({ action: "rename-source", id: group.birth!, name })} />
 									: <span className={`min-w-0 flex-1 truncate text-sm font-medium${empty ? " text-muted-foreground/60" : ""}`}>{group.label ?? <span className="text-muted-foreground/60">unlabeled</span>}</span>}
-								{group.kind === "notes" && <span className="text-[11px] tracking-widest text-muted-foreground/60">notes</span>}
+								{group.kind === "notes" && <span className="text-[11px] tracking-widest text-muted-foreground/60">Notes</span>}
 								<TreeCell widthClassName="w-14" align="right" className="text-xs tabular-nums text-muted-foreground">
 									{group.nodeIds.length}
 								</TreeCell>

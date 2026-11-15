@@ -266,7 +266,6 @@ describe("append-only main-request delivery", () => {
 		assert.ok(Object.hasOwn(f.service.list(f.chatId)!.answering, "side_explanation"), "teacher finishes while helper is still running");
 		const record = chatStore.getChat(f.chatId)!;
 		assert.deepEqual(record.messages.slice(0, before.length), before, "earlier transcript is byte-equivalent");
-		assert.equal(record.sideChats![0]!.contextSnapshot, undefined);
 		const markers = record.messages.filter((message) => message.role === "custom" && message.customType === "side-question");
 		assert.equal(markers.length, 2);
 		assert.equal(record.messages[before.length]!.role, "toolResult", "native result remains adjacent to its question call");
@@ -330,7 +329,6 @@ describe("append-only main-request delivery", () => {
 		assert.equal(dismissed.status, 200);
 		const saved = chatStore.getChat(f.chatId)!;
 		assert.equal(runningTurn(f.chatId), undefined);
-		assert.equal(saved.sideChats![0]!.contextSnapshot, undefined);
 		assert.equal(saved.messages.at(-1)!.role, "toolResult");
 		assert.equal(saved.messages.filter((message) => message.role === "custom" && message.customType === "side-question").length, 0);
 		const later = await f.service.ask(f.chatId, { threadId: "side_explanation", text: "After dismissal", quotes: [] });
@@ -349,7 +347,6 @@ describe("append-only main-request delivery", () => {
 		parkDismissal(f.chatId, { type: "dismiss", toolCallId: "check", answer: { ...gradedAnswer(), dismissed: true } });
 		applyParkedDismissal(chatStore, f.chatId);
 		const saved = chatStore.getChat(f.chatId)!;
-		assert.equal(saved.sideChats![0]!.contextSnapshot, undefined);
 		assert.equal(saved.messages.at(-1)!.role, "toolResult");
 		assert.equal(saved.messages.filter((message) => message.role === "custom" && message.customType === "side-question").length, 0);
 		assert.doesNotMatch(JSON.stringify(saved.messages), /Partial helper text/);
@@ -390,7 +387,6 @@ describe("append-only main-request delivery", () => {
 		const response = await f.service.ask(f.chatId, { anchor: f.anchor, text: "An old question", quotes: [] });
 		const reader = await seenPartial(response); f.finish(); await f.service.settled(f.chatId, "side_explanation"); await reader.cancel();
 		const record = chatStore.getChat(f.chatId)!;
-		assert.equal(record.sideChats![0]!.contextSnapshot, undefined);
 		assert.equal(sideConversationEntries(record).length, 2);
 		const next = await mainInput(f.chatId, { type: "text", text: "Keep teaching" }, f.service);
 		assert.match(JSON.stringify(next.contexts), /An old question/);

@@ -1,16 +1,21 @@
 # syntax=docker/dockerfile:1
-FROM node:24-bookworm-slim AS build
+FROM node:26-bookworm-slim AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 # The server uses native optional packages, but never installs Electron's binary.
 RUN npm ci --ignore-scripts --no-audit --no-fund
 COPY . .
-RUN npm run build \
+RUN npm run plugins:setup \
+    && NODE_ENV=test node --import tsx --test tests/pdf-native-render.test.ts tests/pdf-ops.test.ts tests/svg-native-render.test.ts \
+    && npm run build \
+    && node scripts/smoke-provider-runtime.mjs \
     && node scripts/build-server.mjs \
-    && node scripts/smoke-server.mjs
+    && node scripts/smoke-image-runtime.mjs --standalone .next/standalone \
+    && npm run headless:build-check \
+    && node scripts/smoke-server.mjs --isolated
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:26-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
@@ -31,8 +36,10 @@ RUN apt-get update \
     && chmod 700 /data/auth \
     && chown -R node:node /data
 COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/headless-check/headless-image-check.mjs ./src/agent/subagents/headless-image-check.mjs
+COPY --from=build --chown=node:node /app/scripts/smoke-shutdown-runtime.mjs ./scripts/smoke-shutdown-runtime.mjs
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
-    CMD node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+    CMD node -e "const headers=process.env.LH_PUBLIC_ORIGIN?{host:new URL(process.env.LH_PUBLIC_ORIGIN).host}:{};fetch('http://127.0.0.1:'+process.env.PORT+'/api/health',{headers}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node", "server.js"]

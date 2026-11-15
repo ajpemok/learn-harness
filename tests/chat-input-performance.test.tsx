@@ -202,7 +202,7 @@ describe("session text fields keep keystrokes local", () => {
 		}
 		const host = await mount(<Parent />);
 		const submit = async () => { await act(async () => { host.querySelector("form")!.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true })); }); };
-		assert.ok(host.querySelector('[aria-label="Next problem"]'));
+		assert.ok(host.querySelector('[aria-label="Next Problem"]'));
 		await submit();
 		assert.equal(nexts, 1);
 		await act(async () => { update({ dictationActive: true }); });

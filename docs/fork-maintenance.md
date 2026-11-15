@@ -24,7 +24,6 @@ Runtime credentials, learning data, private hostnames and deployment inventories
 | Interface | Clearer copy, natural empty-state wrapping, aligned composer controls, owner wordmark beside the logo and reduced-motion support | `app/globals.css`, `components/composer-actions.tsx`, `components/owner-wordmark.tsx`, `components/sidebar.tsx`, render tests |
 | Headless Hosting | Standalone Linux image, persistent state/auth/sources separation, health route and remote ChatGPT callback completion | `Dockerfile`, `.dockerignore`, `docs/headless.md`, web-subscription modules and tests |
 | Study Files | Headless source-root confinement; retain upstream file/PDF/image handling within that boundary | `src/agent/tools/fs-shared.ts`, `tests/headless-sources.test.ts` |
-| Terra Discovery | Account must advertise the model; SDK metadata takes precedence over the temporary compatibility entry | `src/agent/chatgpt-models.ts`, `src/agent/chatgpt-bridge.ts`, `tests/chatgpt-catalog.test.ts` |
 | Shutdown | Initialise cleanup before requests, close notification streams and cancel web provider transports on signals; let Next drain and exit | `instrumentation.ts`, `src/server/shutdown.ts`, `scripts/smoke-shutdown-runtime.mjs` |
 
 Prefer upstream behaviour for model admission, billing disclosure, question authority, persistence and rendering.
@@ -64,8 +63,15 @@ Check the intentional differences above even when Git reports no conflict.
 | `components/`, `app/layout.tsx`, `src/core/keyboard.ts` | Keep upstream component owners, image/plugin support, themes, focus and source organisation. Apply the fork's copy and label casing to the resulting controls. Keep the owner wordmark and reduced motion. Render tests follow current component behaviour. |
 | `scripts/smoke-server.mjs`, `main` | Retain upstream plugin and relocated-payload probes. Run shutdown verification against the selected standalone directory, including isolated mode. Windows cannot establish POSIX shutdown. |
 
-The initial focused merge check passed 66 tests covering callbacks, headless sources/origins and writing guidance.
-Final qualification also requires the follow-up compatibility removals, packaging repairs and full checks.
+The fork requires SDK metadata and account advertisement for every ChatGPT model.
+There is no release-lag Terra metadata entry.
+Side-conversation delivery accepts current append-only update entries; the obsolete snapshot reader and field are removed.
+These changes do not migrate old records.
+
+The Docker build uses Node 26, prepares upstream source plugins and includes the explicit SDK/authoring inputs.
+Tracked example `dist/` inputs remain available to the authoring bundle; generated local plugin outputs and dependencies stay outside the build context.
+The final image contains a bounded renderer check and the existing shutdown check, documented in [Headless Docker Server](headless.md#build-and-run).
+`esbuild` is a declared development dependency for bundling the renderer check; its version matches the existing lockfile entry.
 
 ## Future Updates
 

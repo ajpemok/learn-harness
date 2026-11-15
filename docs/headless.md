@@ -12,11 +12,29 @@ finished image to the server. Windows developers can use a Linux builder in WSL.
 Keep the build cache off the deployment host and retain the previous runtime
 image for rollback. Native PDF/SVG dependencies must match the target platform.
 The image includes Chromium for demo checks; it starts only on demand.
+Both image stages use Node 26, matching upstream's build environment.
+The build prepares the locked source-plugin dependencies and stages the core plugin packages before Next builds the application.
 
 ```sh
 docker build --platform linux/amd64 -t learn-harness:headless .
 docker save -o learn-harness-image.tar learn-harness:headless
 ```
+
+Before transferring the image, run its disposable renderer and shutdown checks:
+
+```sh
+docker run --rm --network none --entrypoint node learn-harness:headless \
+  /app/src/agent/subagents/headless-image-check.mjs
+docker run --rm --network none --entrypoint node learn-harness:headless \
+  /app/scripts/smoke-shutdown-runtime.mjs /app
+```
+
+These commands retain the image's `node` user and use synthetic inputs and temporary state.
+The renderer check bundles the production PDF/SVG/demo functions and loads the final image's native dependencies and `/usr/bin/chromium`.
+It requires disabled container networking, checks opaque-origin execution and refuses local file reads.
+The shutdown check runs the built server with synthetic credentials and blocked provider requests.
+Neither check establishes real sign-in, provider entitlement or deployment access control.
+The image build also runs `pdf-native-render.test.ts`, `pdf-ops.test.ts` and `svg-native-render.test.ts` on Linux, plus provider/image checks and isolated standalone checks.
 
 Copy the archive to the deployment host, then load and run it:
 
@@ -56,6 +74,10 @@ idle, and verify the exit status before taking a stopped-data backup.
 | `/data/auth` | API keys and subscription credentials, stored as private plaintext files |
 | `/data/sources` | Study files available to the agent's filesystem tools |
 
+Core plugin code stays in the image's `/app/core-plugins/` directory.
+Core plugin records live under `/data/state/core-plugin-data/<id>/`; community plugin code and records use `/data/state/plugins/<id>/`.
+Newly discovered plugins start disabled.
+
 Reference a file under `/data/sources` by its relative name in a message. For
 example, an administrator can copy a PDF into the running container:
 
@@ -64,6 +86,11 @@ docker cp notes.pdf learn-harness:/data/sources/notes.pdf
 ```
 
 File tools reject paths outside the study folder, including symlink escapes.
+Relative paths start in the study folder.
+With the optional File Access restriction off, `ls` without a path lists that folder's contents.
+With it on, `ls` lists the effective allowed-folder paths within the study folder; searches use those same roots.
+An allowed parent folder grants only the study folder, an allowed child grants that child, and disjoint or unavailable roots grant no access.
+Settings cannot widen the image's study-folder boundary, and sensitive-location denials still apply.
 This restriction covers filesystem reads; it is not an operating-system sandbox
 for generated demonstrations or a restriction on outbound web requests.
 
@@ -93,6 +120,8 @@ Set `LH_PUBLIC_ORIGIN` to the exact external HTTPS origin, for example
 Preserve that hostname in the backend `Host` header. Learn Harness uses the
 configured origin for subscription controls and rejects mismatching hosts or
 origins. It does not use forwarded headers to grant that trust.
+Also set `LH_ALLOWED_HOSTS` to the external hostname, without its scheme or port.
+The shared upstream API guard requires this explicit host admission, including for streamed plugin documents.
 
 This setting does not authenticate users. Cloudflare Access policy, direct
 backend bypass, streaming/reconnection and expired sessions must be checked on
@@ -106,6 +135,7 @@ existing infrastructure repository.
 | `LH_AUTH_FILE` | `/data/auth/auth.json` | API-key file; subscription files live beside it |
 | `LH_SOURCES_DIR` | `/data/sources` | Canonical study-file boundary; desktop behaviour is unchanged when unset |
 | `LH_PUBLIC_ORIGIN` | Unset | Approved external HTTPS origin |
+| `LH_ALLOWED_HOSTS` | Unset | Explicit external hostnames admitted by the browser API guard |
 | `CHROME_PATH` | `/usr/bin/chromium` | Browser used for on-demand demo checks |
 
 ## Operation and Acceptance

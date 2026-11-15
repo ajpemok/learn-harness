@@ -333,7 +333,7 @@ describe("ChainTableBody — chain rows (chips + connectors)", () => {
 		assert.equal(row.querySelectorAll("mtr").length, 2);
 		assert.equal(row.querySelectorAll(".katex-error").length, 0);
 		assert.equal(row.querySelector('[data-streamdown="inline-code"]')?.textContent, "literal");
-		assert.ok(row.querySelector('[aria-label="Copy code"]'));
+		assert.ok(row.querySelector('[aria-label="Copy Code"]'));
 		assert.ok(row.querySelector('[data-testid="md-code"]')?.textContent?.includes('const text = "\\n";'));
 		assert.ok(row.querySelector("table"));
 		assert.equal(row.querySelector("img"), null);

@@ -84,7 +84,7 @@ it("the Appearance switch preserves siblings, applies immediately through the pr
     const { appearance, onAppearanceChange } = useAppearance();
     return <AppearanceSection appearance={appearance} onSectionChange={next => { writes.push(next); onAppearanceChange(next); return true; }} />;
   }
-  const toggle = () => document.querySelector<HTMLButtonElement>('[role="switch"][aria-label="Code ligatures"]')!;
+  const toggle = () => document.querySelector<HTMLButtonElement>('[role="switch"][aria-label="Code Ligatures"]')!;
   const token = () => document.documentElement.style.getPropertyValue("--lh-code-ligatures");
   try {
     await act(async () => root.render(<InteractionLayersProvider><AppearanceProvider initialAppearance={{ proseFontSize: 20, fontFamily: "Georgia" }} initialTheme={DEFAULT_THEME}><Panel /></AppearanceProvider></InteractionLayersProvider>));

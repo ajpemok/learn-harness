@@ -32,6 +32,7 @@ test("the shared browser API guard requires both explicit host admission and the
 		method, headers: { host: "learn.example.invalid", origin: "https://learn.example.invalid", "sec-fetch-site": "same-origin", ...headers },
 	});
 	assert.equal(apiRequestRefusal(request(), env), undefined);
+	assert.equal(apiRequestRefusal(new Request("http://127.0.0.1:3000/api/health", { headers: { host: "learn.example.invalid" } }), env), undefined);
 	assert.match(apiRequestRefusal(request(), { ...env, LH_ALLOWED_HOSTS: "" })!, /not allowed/);
 	assert.match(apiRequestRefusal(request("POST", { origin: "http://learn.example.invalid" }), env)!, /Cross-site/);
 	for (const method of ["GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE"]) {

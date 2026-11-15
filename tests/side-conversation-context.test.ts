@@ -86,16 +86,6 @@ describe("append-only raw learner–helper updates", () => {
 		assert.match(entries(first, [corrected])[0]!.content, /updated wording of the earlier reply/);
 		assert.deepEqual(first, unchanged);
 	});
-	it("continues legacy published snapshots but ignores obsolete per-thread cutoffs", () => {
-		const old: LhMessage = { id: "exchange_side_segment", role: "custom", customType: "side-question", content: "LEGACY RAW PREFIX", display: false, timestamp: 1,
-			details: { threadId: live.id, snapshot: partial.messages } };
-		const legacyThread = { ...live, contextSnapshot: [] };
-		const next = entries([old], [legacyThread]);
-		assert.equal(next.length, 1); assert.match(next[0]!.content, /continued reply/);
-		assert.equal(old.content, "LEGACY RAW PREFIX");
-		assert.deepEqual(entries([old, ...next], [legacyThread]), []);
-		assert.equal(entries([], [legacyThread]).length, 2, "an unpublished legacy cutoff does not consume exchanges");
-	});
 	it("marks a published partial interrupted exactly once if its ephemeral run was lost on restart", () => {
 		const first = entries([], [partial]);
 		const afterRestart = { ...live, messages: [live.messages[0]!] };

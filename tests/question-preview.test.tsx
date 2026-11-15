@@ -322,7 +322,7 @@ describe("probe conclusion Markdown", () => {
 			for (const css of ["my-3", "overflow-hidden", "rounded-xl", "border", "bg-card/60"]) assert.ok(card.classList.contains(css));
 			assert.ok(!card.classList.contains("bg-background/60"), "keep the original card color, not the page background");
 			const summary = card.querySelector("summary")!;
-			assert.match(summary.textContent, /Probe assessment/);
+			assert.match(summary.textContent, /Probe Assessment/);
 			assert.ok(summary.textContent.includes(`${count} strand${count === 1 ? "" : "s"}`));
 			assert.ok(!summary.textContent.includes("·") && !summary.textContent.includes("BODY"));
 			assert.ok(summary.classList.contains("hover:bg-accent/40"));

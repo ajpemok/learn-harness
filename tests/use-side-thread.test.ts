@@ -57,14 +57,13 @@ describe("one durable side companion", () => {
 		assert.deepEqual(state?.messages, thread.messages);
 		assert.equal(state?.mode, "popover");
 	});
-	it("does not let an obsolete cutoff hide new answers in an older thread", () => {
-		const updated = { ...thread, contextSnapshot: thread.messages, messages: [...thread.messages, {
+	it("accepts newly completed answers for the active thread", () => {
+		const updated = { ...thread, messages: [...thread.messages, {
 			id: "reply", role: "assistant" as const, text: "A late answer.", at: "2026-11-05T00:00:02Z",
 		}] };
 		const state = reduce(open(), { type: "done", thread: updated })!;
 		assert.equal(state.messages.length, 2);
 		assert.equal(state.answering, false);
-		assert.equal(Object.hasOwn(state, "contextFrozen"), false);
 	});
 	it("keeps a failed manually submitted question available rather than silently losing it", () => {
 		const failed = reduce(open(), { type: "error", threadId: thread.id, error: "No model", question: "Why?" });

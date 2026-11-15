@@ -71,7 +71,7 @@ export function TreeCell({ widthClassName, grow, align, className, style, ...pro
 }
 
 export function TreeHeader({ sticky = false, className, ...props }: HTMLAttributes<HTMLDivElement> & { sticky?: boolean }) {
-	return <div {...props} className={classes(sticky && "sticky top-0 z-10", "flex shrink-0 items-center gap-1 border-b border-border/60 bg-background/80 px-3 py-1.5 text-[11px] uppercase tracking-widest text-muted-foreground/70 backdrop-blur", className)} />;
+	return <div {...props} className={classes(sticky && "sticky top-0 z-10", "flex shrink-0 items-center gap-1 border-b border-border/60 bg-background/80 px-3 py-1.5 text-[11px] tracking-widest text-muted-foreground/70 backdrop-blur", className)} />;
 }
 
 export function TreeGuide({ depth = 0, selectionColumn, variant = "branch", className, style, ...props }: HTMLAttributes<HTMLDivElement> & {

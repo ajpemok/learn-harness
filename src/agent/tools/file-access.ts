@@ -99,9 +99,8 @@ export function resolvePolicy(policy: FileAccessPolicy = fileAccessPolicy()): Re
 	return { restricted: true, folders, unavailable };
 }
 
-/** Accept only canonical source locations contained by the snapshot. Source
- * symlinks resolve before containment; a link cannot escape the chosen roots.
- * fs-shared runs its mandatory named AND canonical denials before this gate. */
+/** Apply mandatory headless confinement and the optional folder policy.
+ * fs-shared checks named and canonical sensitive locations before this gate. */
 export function guardSourcePath(absolute: string, policy: ResolvedFileAccessPolicy = resolvePolicy()): string {
 	const real = realSourcePath(absolute);
 	const root = headlessSourceRoot();
