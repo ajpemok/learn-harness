@@ -73,6 +73,34 @@ Tracked example `dist/` inputs remain available to the authoring bundle; generat
 The final image contains a bounded renderer check and the existing shutdown check, documented in [Headless Docker Server](headless.md#build-and-run).
 `esbuild` is a declared development dependency for bundling the renderer check; its version matches the existing lockfile entry.
 
+## Validation: 0.6.1
+
+Source checked on 15 November 2026: `6ae01bd12e6d994d597cc4491fd14d5e977d1c2f`.
+The native Linux copy matched all 1,272 indexed source files and the source tree `4952dcbfa01350068c877cf9824ab7ab05f7ea88`.
+Linux checks used Node 26.8.2 and npm 11.19.1 from the existing managed environment's lockfile.
+
+| Check | Result |
+| --- | --- |
+| Full Linux Suite | 5,350 passed, four skipped, zero failures. The skips cover Windows semantics and case-insensitive filesystem fixtures. |
+| Final Source, Origin and Read Checks | 111 passed, three filesystem/platform skips, zero failures. |
+| Separate Plugin Suites | 388 passed across coding questions, drawing pad, flashcards, rich code blocks and UI Showcase. |
+| Type Checking and Lint | Passed. Lint retains the upstream `source-name-ui.test.tsx` fixture warning about its synthetic `<head>` element. |
+| Linux Production Build | Passed, including TypeScript and static page generation. |
+| Provider and Image Payloads | Native provider initialisation and Photon resizing in process and in the worker passed offline, with zero external network attempts. |
+| Isolated Standalone Server | Passed outside the source checkout, including core-plugin activation/assets/storage and external-plugin lifecycle checks. |
+| Shutdown | Open notification streams and queued provider requests both settled without a forced kill. |
+| Native PDF/SVG Rendering | Passed in the Linux test suite. |
+| Final Docker Image and Chromium | Prepared, but unexecuted because no Docker CLI/builder was available. Run the image checks in the headless guide before deployment qualification. |
+
+Turbopack emitted two broad-trace warnings in existing browser-helper/PDF paths.
+The curated standalone payload excluded Git metadata, private root state and source-plugin projects, and passed the isolated import/runtime checks.
+Windows full-suite qualification remains open: its initial run exposed POSIX/path/line-ending assumptions and synthetic file-replacement failures.
+The Linux results do not establish Windows runtime acceptance.
+
+The pinned dependency tree's audit reported 22 vulnerable dependency entries: three critical, eight high and 11 moderate.
+Those dependency advisories remain unresolved by this merge.
+These source and offline runtime checks do not establish real sign-in, provider entitlement, Docker signal handling or live deployment acceptance.
+
 ## Future Updates
 
 Start with a clean working tree and retain the deployed source commit and image reference in private operation records.
