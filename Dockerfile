@@ -2,6 +2,9 @@
 FROM node:26-bookworm-slim AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends fontconfig fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 # The server uses native optional packages, but never installs Electron's binary.
 RUN npm ci --ignore-scripts --no-audit --no-fund
