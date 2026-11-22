@@ -321,7 +321,7 @@ export function ChainTableBody({
 				<span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
 					{chains.length} {chains.length === 1 ? "chain" : "chains"} · {nodes.length} {nodes.length === 1 ? "node" : "nodes"}
 				</span>
-				{onOrganizationChange && <button type="button" aria-label="Add folder" data-testid="add-source-folder"
+				{onOrganizationChange && <button type="button" aria-label="Add Folder" data-testid="add-source-folder"
 					onClick={() => setCreatingFolder(true)} className="lh-no-drag rounded-lg p-2 text-muted-foreground hover:bg-accent"><FolderPlusIcon className="size-4" /></button>}
 				<div className="relative shrink-0">
 					<SearchIcon className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
