@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Toggle } from "./controls";
 
+// APA Title Case keeps these short function words lowercase after the first word.
+const MINOR_WORDS = new Set(["a", "an", "and", "as", "at", "but", "by", "for", "if", "in", "nor", "of", "off", "on", "or", "per", "so", "the", "to", "up", "via", "yet"]);
+
 export function promptSegmentName(path: string): string {
 	const name = (path.split("/").at(-1) ?? "").replace(/\.[^.]+$/, "").replace(/^[\d-]+/, "").replace(/-+/g, " ");
-	return name.charAt(0).toUpperCase() + name.slice(1);
+	return name.split(" ").map((word, i) => i > 0 && MINOR_WORDS.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 }
 
 export function PromptSegmentRow({ path, usageHint, hasOverride, enabled, busy, switching, error, onView, onEdit, onToggle }: {
@@ -36,7 +39,7 @@ export function PromptSegmentRow({ path, usageHint, hasOverride, enabled, busy, 
 					{hasOverride ? "Edit Override" : "+ Add Override"}
 				</Button>
 				<div className="flex items-center gap-2 sm:ml-2">
-					<span className="w-[20ch] text-xs text-muted-foreground">In use: <span className="text-foreground">{enabled ? "Your Version" : "Default"}</span></span>
+					<span className="w-[20ch] text-xs text-muted-foreground">In Use: <span className="text-foreground">{enabled ? "Your Version" : "Default"}</span></span>
 					<span className={cn("flex", !hasOverride && "opacity-40")}>
 						<Toggle label={`Use Your Override for ${name}`} title="Use Your Override Instead of the Default" checked={enabled} disabled={!hasOverride || busy || switching} onChange={onToggle} />
 					</span>

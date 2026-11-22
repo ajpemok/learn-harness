@@ -42,11 +42,11 @@ it("the folder Delete reuses the session dialog's surface with plural wording", 
 	const html = renderToStaticMarkup(<DeleteSessionBody chat={{ id: "f1", title: "Physics" }} copy={copy} traces={false} busy={false}
 		failure={null} onTraces={() => {}} onClose={() => {}} onRun={() => {}} />);
 	assert.match(html, /data-testid="delete-folder-dialog"/);
-	assert.match(html, /Delete folder\?/);
+	assert.match(html, /Delete Folder\?/);
 	assert.match(html, />Physics</);
 	assert.match(html, /the 3 sessions and 1 subfolder inside/);
 	assert.match(html, /2 imported notes files inside move to the top level\./);
-	assert.match(html, /Also remove their graph traces/);
+	assert.match(html, /Also Remove Their Graph Traces/);
 	assert.match(html, /data-testid="delete-traces-checkbox"/);
 	const one = folderDeleteCopy({ sessions: 1, subfolders: 0, notes: 1, parentName: "Top" });
 	assert.match(one.body, /the 1 session inside/);

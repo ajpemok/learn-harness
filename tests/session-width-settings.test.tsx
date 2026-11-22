@@ -123,7 +123,7 @@ it("Appearance rows: the slider commits on release (Full = absent) and the toggl
 			slider().dispatchEvent(new dom.window.Event("change", { bubbles: true }));
 		});
 	};
-	const toggle = () => document.querySelector<HTMLButtonElement>('[role="switch"][aria-label="Adapt question layout"]')!;
+	const toggle = () => document.querySelector<HTMLButtonElement>('[role="switch"][aria-label="Adapt Question Layout"]')!;
 	try {
 		await act(async () => root.render(<InteractionLayersProvider><AppearanceProvider initialAppearance={{ proseFontSize: 20 }} initialTheme={DEFAULT_THEME}><Panel /></AppearanceProvider></InteractionLayersProvider>));
 		assert.equal(slider().getAttribute("min"), "46");

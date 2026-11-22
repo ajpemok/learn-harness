@@ -10,6 +10,8 @@ import { findTool } from "../src/agent/tools/find.ts";
 import { grepTool } from "../src/agent/tools/grep.ts";
 import { fileAccessPolicy, resolvePolicy, setFileAccessPolicy } from "../src/agent/tools/file-access.ts";
 import { sourceSearchRoots } from "../src/agent/tools/fs-shared.ts";
+import { checkPdfPage, loadPdfFigureSource } from "../src/agent/tools/pdf-figure.ts";
+import { tinyPdf } from "./helpers/tiny-pdf.ts";
 
 test("server study files cannot escape through absolute paths, traversal or symlinked parents", async () => {
 	const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "lh-study-root-"));
@@ -92,6 +94,36 @@ test("headless listings and searches intersect optional folders without widening
 		setFileAccessPolicy(() => previousPolicy);
 		if (previousRoot === undefined) delete process.env.LH_SOURCES_DIR;
 		else process.env.LH_SOURCES_DIR = previousRoot;
+		await fs.rm(scratch, { recursive: true, force: true });
+	}
+});
+
+test("PDF figure dispatch and job reads stay inside the study folder", async () => {
+	const scratch = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "lh-study-pdf-")));
+	const root = path.join(scratch, "sources");
+	const outside = path.join(scratch, "outside.pdf");
+	const previous = process.env.LH_SOURCES_DIR;
+	const pdf = tinyPdf([{ runs: [{ text: "Figure", x: 72, y: 720 }] }]);
+	try {
+		await fs.mkdir(root);
+		await fs.writeFile(path.join(root, "slides.pdf"), pdf);
+		await fs.writeFile(outside, pdf);
+		process.env.LH_SOURCES_DIR = root;
+		assert.equal(await checkPdfPage("slides.pdf", 1), path.join(root, "slides.pdf"));
+		const source = await loadPdfFigureSource("slides.pdf", 1);
+		await source.close();
+		await fs.symlink(scratch, path.join(root, "escape"), process.platform === "win32" ? "junction" : "dir");
+		for (const escape of [outside, "../outside.pdf", "escape/outside.pdf"]) {
+			await assert.rejects(checkPdfPage(escape, 1), /study folder/);
+			await assert.rejects(loadPdfFigureSource(escape, 1), /study folder/);
+		}
+		if (process.platform !== "win32") {
+			await fs.symlink(outside, path.join(root, "linked.pdf"));
+			await assert.rejects(checkPdfPage("linked.pdf", 1), /study folder/);
+		}
+	} finally {
+		if (previous === undefined) delete process.env.LH_SOURCES_DIR;
+		else process.env.LH_SOURCES_DIR = previous;
 		await fs.rm(scratch, { recursive: true, force: true });
 	}
 });
