@@ -65,6 +65,20 @@ test("account-offered GPT-6.1 Terra resolves from the bundled Responses catalog"
  }]);
 });
 
+test("account-offered GPT-6.2 models resolve from the bundled Responses catalog", async () => {
+ const refresh = refreshConnectionCatalog("chatgpt");
+ reply(pending.at(-1), { ...value("B", 10, "B", 3), models: [
+  { id: "gpt-6.2-sol", name: "GPT-6.2 Sol" },
+  { id: "gpt-6.2-astra", name: "GPT-6.2 Astra" },
+  { id: "not-in-the-bundled-catalog", name: "Unsupported" },
+ ] });
+ await refresh;
+ assert.deepEqual(chatGPTModels().map(({ id, provider }) => ({ id, provider })), [
+  { id: "gpt-6.2-sol", provider: "chatgpt" },
+  { id: "gpt-6.2-astra", provider: "chatgpt" },
+ ]);
+});
+
 test("account-advertised models without SDK metadata stay unavailable", async () => {
  const refresh = refreshChatGPTModels([]);
  reply(pending.at(-1), { ...value("unused", 20, "C", 4), models: [
