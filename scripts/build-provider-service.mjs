@@ -3,10 +3,11 @@ import * as path from "node:path";
 
 // A separate process in the same image, using the app's traced dependencies.
 const root = path.resolve(import.meta.dirname, "..");
+const outfile = path.resolve(root, process.argv[2] ?? ".next/standalone/provider-service.mjs");
 await build({
 	absWorkingDir: root,
 	entryPoints: ["src/provider-service/main.ts"],
-	outfile: path.join(root, ".next/standalone/provider-service.mjs"),
+	outfile,
 	bundle: true,
 	packages: "external",
 	platform: "node",

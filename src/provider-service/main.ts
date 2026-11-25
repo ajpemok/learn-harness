@@ -8,7 +8,8 @@ function required(name: string): string {
 	return value;
 }
 
-const socket = required("LH_PROVIDER_SOCKET"), adminSocket = required("LH_PROVIDER_ADMIN_SOCKET");
+// Distinct from the app's LH_PROVIDER_* names: this process is not an app instance.
+const socket = required("LH_PROVIDER_SERVICE_SOCKET"), adminSocket = required("LH_PROVIDER_SERVICE_ADMIN_SOCKET");
 
 if (process.argv.includes("--health")) {
 	const probe = net.connect(socket, () => probe.write(`${JSON.stringify({ op: "health" })}\n`));
@@ -18,7 +19,7 @@ if (process.argv.includes("--health")) {
 } else {
 	const service = await startProviderService({
 		socket, adminSocket,
-		owner: { directory: required("LH_PROVIDER_CREDENTIALS_DIR") },
+		owner: { directory: required("LH_PROVIDER_SERVICE_CREDENTIALS_DIR") },
 		runClaude: createClaudeLauncher(),
 	});
 	const stop = () => { void service.close().then(() => process.exit(0)); };

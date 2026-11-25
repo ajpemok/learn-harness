@@ -163,6 +163,30 @@ test("a Claude request cannot add CLI flags, tools or paths", () => {
 	assert.throws(() => parseLaunch(null), /invalid/);
 });
 
+test("the bundled service starts, reports health and stops", { timeout: 60_000 }, async (t) => {
+	// Inside the checkout so the bundle resolves the app's dependencies, as in the image.
+	const output = await fs.mkdtemp(path.join(root, ".next-provider-test-"));
+	t.after(() => fs.rm(output, { recursive: true, force: true }));
+	const bundle = path.join(output, "provider-service.mjs");
+	const env: NodeJS.ProcessEnv = {
+		PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, TEMP: process.env.TEMP, NODE_ENV: "test", HOME: output, USERPROFILE: output,
+		LH_PROVIDER_SERVICE_SOCKET: socketPath("bundle"), LH_PROVIDER_SERVICE_ADMIN_SOCKET: socketPath("bundle-admin"),
+		LH_PROVIDER_SERVICE_CREDENTIALS_DIR: await credentials(),
+	};
+	const run = async (args: string[]) => { const child = spawn(process.execPath, args, { cwd: root, env, stdio: "ignore" }); return (await once(child, "exit"))[0] as number; };
+	assert.equal(await run([path.join(root, "scripts/build-provider-service.mjs"), bundle]), 0);
+	const service = spawn(process.execPath, [bundle], { cwd: output, env, stdio: ["ignore", "pipe", "inherit"] });
+	t.after(() => service.kill("SIGKILL"));
+	const [line] = await Promise.race([once(service.stdout, "data"), once(service, "exit").then(() => assert.fail("the service exited"))]);
+	assert.match(String(line), /ready/);
+	assert.equal(await run([bundle, "--health"]), 0);
+	const exited = once(service, "exit");
+	service.kill("SIGTERM");
+	const [code] = await exited;
+	if (process.platform !== "win32") assert.equal(code, 0);
+	assert.equal(await run([bundle, "--health"]), 1);
+});
+
 test("two apps share sign-ins, keys and provider settings while lessons stay separate", { timeout: 90_000 }, async (t) => {
 	const socket = socketPath("runtime"), adminSocket = socketPath("admin");
 	const shared = await fs.mkdtemp(path.join(directory, "shared-"));
