@@ -94,6 +94,25 @@ Settings cannot widen the image's study-folder boundary, and sensitive-location 
 This restriction covers filesystem reads; it is not an operating-system sandbox
 for generated demonstrations or a restriction on outbound web requests.
 
+## Shared Provider Service
+
+Two single-user instances can share one set of providers while keeping separate
+lessons and files. Run `node provider-service.mjs` from the same image as a third
+container. It owns the subscription credentials and the Claude Code sign-in.
+
+| Container | Environment Variables | Mounts |
+| --- | --- | --- |
+| Service | `LH_PROVIDER_SERVICE_SOCKET`, `LH_PROVIDER_SERVICE_ADMIN_SOCKET`, `LH_PROVIDER_SERVICE_CREDENTIALS_DIR` | Credentials and both socket directories |
+| Primary | `LH_PROVIDER_ROLE=primary`, `LH_PROVIDER_SOCKET`, `LH_PROVIDER_ADMIN_SOCKET` | Both socket directories and the key directory |
+| Secondary | `LH_PROVIDER_ROLE=secondary`, `LH_PROVIDER_SOCKET` | Runtime socket directory, and the key directory read-only |
+
+Both instances set `LH_AUTH_FILE` inside the key directory. Keys, model choices,
+the Claude Code switch and any custom endpoint follow the primary, and the
+secondary refuses changes to them. Anyone who can open either instance uses the
+same subscriptions. An incomplete configuration stops the server from starting.
+Check the service with `node provider-service.mjs --health`. Losing it disconnects
+both instances until it returns.
+
 ## Remote ChatGPT Sign-In
 
 1. Open Settings > Providers > ChatGPT and continue with ChatGPT. Allow the new
