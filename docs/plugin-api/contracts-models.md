@@ -251,6 +251,7 @@ export interface ModelCatalogResponse {
     rolePins: RolePins;
     slots: SlotPins;
     providers: CatalogProvider[];
+    providersReadOnly?: true;
 }
 ```
 
@@ -263,6 +264,7 @@ export interface ModelCatalogResponse {
 - [rolePins](#modelcatalogresponse-rolepins)
 - [slots](#modelcatalogresponse-slots)
 - [providers](#modelcatalogresponse-providers)
+- [providersReadOnly](#modelcatalogresponse-providersreadonly)
 
 ### ModelCatalogResponse models
 
@@ -305,6 +307,14 @@ provider has currently selectable models; inspect models and keyPresent.
 
 ```ts
 providers: CatalogProvider[];
+```
+
+### ModelCatalogResponse providersReadOnly
+
+Present when another instance manages the provider settings.
+
+```ts
+providersReadOnly?: true;
 ```
 
 ## RolePins
