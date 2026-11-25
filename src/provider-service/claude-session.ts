@@ -52,6 +52,9 @@ export function serveClaude(socket: net.Socket, raw: unknown, runClaude: RunClau
 		abort.abort();
 		for (const connection of tunnels.values()) connection.destroy();
 		tunnel.close();
+		// Paused output would hold back the exit that removes this turn's files.
+		child?.stdout.resume();
+		child?.stderr.resume();
 		stopChild();
 	});
 

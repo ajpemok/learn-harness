@@ -22,7 +22,12 @@ if (process.argv.includes("--health")) {
 		owner: { directory: required("LH_PROVIDER_SERVICE_CREDENTIALS_DIR") },
 		runClaude: createClaudeLauncher(),
 	});
-	const stop = () => { void service.close().then(() => process.exit(0)); };
+	// Exit when the last credential write and Claude process finish, inside
+	// Docker's 45-second stop limit. Exiting sooner could lose a rotated token.
+	const stop = () => {
+		setTimeout(() => process.exit(1), 30_000).unref();
+		void service.close();
+	};
 	process.once("SIGTERM", stop);
 	process.once("SIGINT", stop);
 	console.log("[provider-service] ready");

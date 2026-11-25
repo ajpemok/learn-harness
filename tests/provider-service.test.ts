@@ -200,7 +200,23 @@ test("two apps share sign-ins, keys and provider settings while lessons stay sep
 	await t.test("both lease from the one owner, with no refresh in either app", async () => {
 		assert.deepEqual(await Promise.all([primary, secondary].map((app) => app.call("lease", { model: model.id }))), ["fixture-chatgpt-access", "fixture-chatgpt-access"]);
 		assert.equal(refreshes, 0);
+		await assert.rejects(startProviderService({ socket, adminSocket, owner, runClaude }), /already running/);
 		assert.deepEqual(await fs.readdir(shared), ["auth.json"]);
+	});
+
+	await t.test("simultaneous cold catalogue reads both see the models", async () => {
+		const isolated = socketPath("cold");
+		const cold = await startProviderService({ socket: isolated, adminSocket: socketPath("cold-admin"), owner: { directory: await credentials() }, runClaude });
+		try {
+			const read = async () => {
+				const raw = net.connect(isolated);
+				raw.write(`${JSON.stringify({ id: 1, op: "request", channel: "lh:chatgpt", operation: "models" })}\n`);
+				const [reply] = await once(raw, "data");
+				raw.destroy();
+				return JSON.parse(String(reply)).value.models.length;
+			};
+			assert.deepEqual(await Promise.all([read(), read()]), [1, 1]);
+		} finally { await cold.close(); }
 	});
 
 	await t.test("the secondary cannot manage sign-ins; a primary change reaches both", async () => {
@@ -231,6 +247,7 @@ test("two apps share sign-ins, keys and provider settings while lessons stay sep
 		await secondary.call("write", { section: "appearance", value: { proseFontSize: 18 } });
 		const stored = JSON.parse(await fs.readFile(path.join(secondary.home, "state/settings.json"), "utf8"));
 		assert.deepEqual(stored, { version: 1, appearance: { proseFontSize: 18 } });
+		await assert.rejects(secondary.call("saveKey", { value: "tvly-fake-key-1111111111" }), /primary/);
 		await secondary.call("write", { section: "claudeCode", value: { enabled: false } });
 		assert.deepEqual((await primary.call<Record<string, unknown>>("settings")).claudeCode, { enabled: true });
 	});

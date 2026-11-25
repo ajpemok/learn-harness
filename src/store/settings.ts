@@ -145,6 +145,11 @@ export function writeSettings(raw: unknown): UserSettings {
 		settings.agent = { ...settings.agent, fileAccess: { restricted: true, folders: [] } };
 	}
 	const role = providerConnection()?.role;
+	// Provider sections live only in the shared file; a secondary never stores a copy.
+	const local = role ? withoutShared(settings) : settings;
+	fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
+	writeFileAtomicSync(SETTINGS_FILE, JSON.stringify(local, null, "\t"), { allowInPlaceFallback: true });
+	// Last, so a failed save never reaches the other instance.
 	if (role === "primary") {
 		const next = pickShared(settings);
 		if (JSON.stringify(next) !== JSON.stringify(readSharedSections())) {
@@ -152,10 +157,6 @@ export function writeSettings(raw: unknown): UserSettings {
 			writeFileAtomicSync(SHARED_PROVIDER_SETTINGS_FILE, JSON.stringify({ version: settings.version, ...next }, null, "\t"), { mode: 0o600 });
 		}
 	}
-	// Provider sections live only in the shared file; a secondary never stores a copy.
-	const local = role ? withoutShared(settings) : settings;
-	fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
-	writeFileAtomicSync(SETTINGS_FILE, JSON.stringify(local, null, "\t"), { allowInPlaceFallback: true });
 	return role === "secondary" ? { ...local, ...readSharedSections() } : settings;
 }
 

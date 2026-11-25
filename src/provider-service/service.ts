@@ -16,6 +16,16 @@ type Owner = ReturnType<typeof createWebSubscriptionOwner>;
 type OwnerOptions = Omit<Parameters<typeof createWebSubscriptionOwner>[0], "onPacket">;
 type Message = Record<string, unknown>;
 
+/** Two owners would refresh the same credentials against each other. */
+async function refuseSecondOwner(socket: string): Promise<void> {
+	const answered = await new Promise<boolean>((resolve) => {
+		const probe = net.connect(socket);
+		probe.once("connect", () => { probe.destroy(); resolve(true); });
+		probe.once("error", () => resolve(false));
+	});
+	if (answered) throw new Error("Another provider service is already running.");
+}
+
 async function listen(server: net.Server, socket: string): Promise<void> {
 	if (process.platform !== "win32") {
 		// A killed service leaves its socket behind. Replace only a socket, never a file.
@@ -30,10 +40,24 @@ async function listen(server: net.Server, socket: string): Promise<void> {
 	if (process.platform !== "win32") fs.chmodSync(socket, 0o600);
 }
 
+/** A status with the revision it belongs to, even if it changes while being read. */
+async function stampedStatus(owner: Owner) {
+	for (;;) {
+		const { revision } = owner.chatgpt.stamp();
+		const status = await owner.chatgpt.status();
+		const stamp = owner.chatgpt.stamp();
+		if (stamp.revision === revision) return { status, stamp };
+	}
+}
+
 async function runtimeCall(owner: Owner, message: Message): Promise<unknown> {
 	if (message.op === "status") return owner.status();
 	if (message.op !== "request") throw new Error("Unsupported operation.");
 	const channel = message.channel as Channel;
+	if (channel === "lh:chatgpt" && message.operation === "status") {
+		const { status, stamp } = await stampedStatus(owner);
+		return { status, ...stamp };
+	}
 	try { return await owner.request(channel, String(message.operation), (message.fields ?? {}) as Message); }
 	catch (error) { throw new Error(channel === "lh:chatgpt" ? chatGPTError(error) : nativeError(error)); }
 }
@@ -48,8 +72,8 @@ async function adminCall(owner: Owner, message: Message): Promise<unknown> {
 async function greet(owner: Owner, socket: net.Socket, packets: boolean): Promise<void> {
 	try {
 		if (packets) {
-			const status = await owner.chatgpt.status();
-			writeSocketLine(socket, { channel: "lh:chatgpt", packet: { channel: "lh:chatgpt", kind: "state", stamp: owner.chatgpt.stamp(), status, invalidate: "none" } });
+			const { status, stamp } = await stampedStatus(owner);
+			writeSocketLine(socket, { channel: "lh:chatgpt", packet: { channel: "lh:chatgpt", kind: "state", stamp, status, invalidate: "none" } });
 			const snapshot = await owner.native.snapshot();
 			writeSocketLine(socket, { channel: "lh:subscriptions", packet: { channel: "lh:subscriptions", op: "changed", snapshot } });
 		}
@@ -58,12 +82,26 @@ async function greet(owner: Owner, socket: net.Socket, packets: boolean): Promis
 }
 
 export async function startProviderService(options: { socket: string; adminSocket: string; owner: OwnerOptions; runClaude: RunClaude }) {
+	await refuseSecondOwner(options.socket);
 	const observers = new Set<net.Socket>();
+	// The owner lets a newer catalogue read supersede an older one. Two apps
+	// reading together share one read, so neither sees an empty catalogue.
+	let catalogue: Promise<unknown> | undefined;
 	const sockets = new Set<net.Socket>();
 	const owner = createWebSubscriptionOwner({
 		...options.owner,
-		onPacket: (channel, packet) => { for (const socket of observers) writeSocketLine(socket, { channel, packet }); },
+		onPacket: (channel, packet) => {
+			if (packet.invalidate === "all") catalogue = undefined;
+			for (const socket of observers) writeSocketLine(socket, { channel, packet });
+		},
 	});
+
+	function sharedRuntimeCall(current: Owner, message: Message): Promise<unknown> {
+		if (message.op !== "request" || message.channel !== "lh:chatgpt" || message.operation !== "models") return runtimeCall(current, message);
+		if (catalogue) return catalogue;
+		const read = runtimeCall(current, message).finally(() => { if (catalogue === read) catalogue = undefined; });
+		return catalogue = read;
+	}
 
 	function serve(call: typeof runtimeCall, admin: boolean): net.Server {
 		return net.createServer((socket) => {
@@ -87,7 +125,7 @@ export async function startProviderService(options: { socket: string; adminSocke
 		});
 	}
 
-	const runtime = serve(runtimeCall, false), admin = serve(adminCall, true);
+	const runtime = serve(sharedRuntimeCall, false), admin = serve(adminCall, true);
 	await listen(runtime, options.socket);
 	await listen(admin, options.adminSocket);
 	return {

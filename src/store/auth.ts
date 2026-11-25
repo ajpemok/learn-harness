@@ -21,6 +21,7 @@ import { AUTH_FILE } from "../../config.ts";
 import type { AuthStore } from "../core/ports.ts";
 import { CUSTOM_PROVIDER } from "../core/auth-keys.ts";
 import { CUSTOM_AUTH_BINDING, parseCustomAuthBinding, type CustomAuthBinding } from "../core/custom-provider-auth.ts";
+import { PROVIDERS_MANAGED_MESSAGE, providersReadOnly } from "../core/provider-role.ts";
 import { writeFileAtomicSync } from "./atomic-write.ts";
 
 /** The flat string→string map, or {} for absent/corrupt/non-object. */
@@ -41,6 +42,7 @@ function readMap(): Record<string, string> {
  *  atomic-write.ts sets the mode on the temp file before the rename, so
  *  the mode never exists relaxed on the final path. */
 function writeMap(map: Record<string, unknown>): void {
+	if (providersReadOnly()) throw new Error(PROVIDERS_MANAGED_MESSAGE);
 	fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
 	writeFileAtomicSync(AUTH_FILE, `${JSON.stringify(map, null, "\t")}\n`, { mode: 0o600 });
 }
