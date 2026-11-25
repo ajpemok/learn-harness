@@ -19,12 +19,13 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { SETTINGS_FILE } from "../../config.ts";
+import { SETTINGS_FILE, SHARED_PROVIDER_SETTINGS_FILE } from "../../config.ts";
 import {
 	sanitizeUserSettings,
 	type UserSettings,
 } from "../core/settings.ts";
 import type { SettingsStore } from "../core/ports.ts";
+import { providerConnection, SHARED_PROVIDER_SECTIONS } from "../core/provider-role.ts";
 import { writeFileAtomicSync } from "./atomic-write.ts";
 import { parseFileAccessSettings, type FileAccessSettingsResult } from "../core/file-access.ts";
 
@@ -81,9 +82,33 @@ export function readFileAccessSettings(): FileAccessSettingsResult {
 	catch { return { ok: false, error: FILE_ACCESS_ERROR }; }
 }
 
+function pickShared(record: UserSettings | null): Partial<UserSettings> {
+	return Object.fromEntries(SHARED_PROVIDER_SECTIONS.flatMap((name) => record?.[name] === undefined ? [] : [[name, record[name]]]));
+}
+function withoutShared(record: UserSettings): UserSettings {
+	const local = { ...record };
+	for (const name of SHARED_PROVIDER_SECTIONS) delete local[name];
+	return local;
+}
+/** Provider sections from the shared file. Absent or corrupt means none set. */
+function readSharedSections(): Partial<UserSettings> {
+	try { return pickShared(sanitizeUserSettings(JSON.parse(fs.readFileSync(SHARED_PROVIDER_SETTINGS_FILE, "utf-8")))); }
+	catch { return {}; }
+}
+
+/** The record, with provider sections taken from the primary instance when
+ *  instances share providers. Local copies of those sections are ignored. */
+export function readSettings(): UserSettings | null {
+	const local = readLocalSettings();
+	if (!providerConnection()) return local;
+	const shared = readSharedSections();
+	if (!local && Object.keys(shared).length === 0) return null;
+	return { ...withoutShared(local ?? { version: 1 }), ...shared };
+}
+
 /** The persisted record, or null when none exists (first boot). Runs the
  *  migration chain on every read — cheap: a no-op file check when current. */
-export function readSettings(): UserSettings | null {
+function readLocalSettings(): UserSettings | null {
 	let raw: string;
 	try {
 		raw = fs.readFileSync(SETTINGS_FILE, "utf-8");
@@ -119,9 +144,19 @@ export function writeSettings(raw: unknown): UserSettings {
 		// the write explicitly supplies a valid file-access preference.
 		settings.agent = { ...settings.agent, fileAccess: { restricted: true, folders: [] } };
 	}
+	const role = providerConnection()?.role;
+	if (role === "primary") {
+		const next = pickShared(settings);
+		if (JSON.stringify(next) !== JSON.stringify(readSharedSections())) {
+			fs.mkdirSync(path.dirname(SHARED_PROVIDER_SETTINGS_FILE), { recursive: true });
+			writeFileAtomicSync(SHARED_PROVIDER_SETTINGS_FILE, JSON.stringify({ version: settings.version, ...next }, null, "\t"), { mode: 0o600 });
+		}
+	}
+	// Provider sections live only in the shared file; a secondary never stores a copy.
+	const local = role ? withoutShared(settings) : settings;
 	fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
-	writeFileAtomicSync(SETTINGS_FILE, JSON.stringify(settings, null, "\t"), { allowInPlaceFallback: true });
-	return settings;
+	writeFileAtomicSync(SETTINGS_FILE, JSON.stringify(local, null, "\t"), { allowInPlaceFallback: true });
+	return role === "secondary" ? { ...local, ...readSharedSections() } : settings;
 }
 
 /** The typed adapter (core/ports.ts SettingsStore), for the composition root. */

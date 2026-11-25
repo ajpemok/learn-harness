@@ -16,6 +16,7 @@
  */
 
 export * from "./contracts.ts";
+export { PROVIDERS_MANAGED_MESSAGE } from "./provider-role.ts";
 export { embedLearnerImage } from "./learner-image-svg.ts";
 export * from "./ports.ts";
 export * from "./chains.ts";

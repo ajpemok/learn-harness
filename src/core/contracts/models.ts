@@ -62,6 +62,8 @@ export interface ModelCatalogResponse {
 	 * providers where exposed by the host. This is not a guarantee that each
 	 * provider has currently selectable models; inspect models and keyPresent. */
 	providers: CatalogProvider[];
+	/** Present when another instance manages the provider settings. */
+	providersReadOnly?: true;
 }
 
 export type ModelCatalogRefreshOutcome = "updated" | "unchanged" | "no-providers";

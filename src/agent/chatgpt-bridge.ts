@@ -47,7 +47,15 @@ function bridge(): BridgeState {
    }
   };
   process.on("message", (raw: unknown) => { if (desktopIPCConnected()) receive(raw); });
-  onWebSubscriptionPacket("lh:chatgpt", (packet) => { if (webSubscriptionsEnabled()) receive(packet); });
+  onWebSubscriptionPacket("lh:chatgpt", (packet) => {
+   if (!webSubscriptionsEnabled()) return;
+   if (packet.kind !== "lost") { receive(packet); return; }
+   // A restarted service counts revisions from zero again.
+   state.stamp = { epoch: 0, authorityRevision: 0, revision: 0 };
+   state.status = unavailable(); clearCatalog(state); state.catalogRequest++;
+   for (const controller of state.controllers.keys()) controller.abort("all");
+   for (const listener of state.listeners) listener();
+  });
   process.on("disconnect", () => {
    if (webSubscriptionsEnabled()) return;
    state.status = unavailable(); clearCatalog(state); state.catalogRequest++;

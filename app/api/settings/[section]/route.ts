@@ -32,13 +32,16 @@
 
 import { isBuiltinThemeId, type AgentSettings, type AppearanceSettings, type ChatSettings, type ModelsSettings } from "@/src/core";
 import {
+	PROVIDERS_MANAGED_MESSAGE,
 	SETTINGS_SECTIONS,
+	SHARED_PROVIDER_SECTIONS,
 	allSegmentPaths,
 	clampChatLevel,
 	clampModelsLevels,
 	effectiveSettings,
 	fileAccessConfigurationError,
 	promptOverrides,
+	providersReadOnly,
 	readSettingsRecord,
 	refreshWorkerRequestAdmission,
 	themeStore,
@@ -61,6 +64,9 @@ export async function PUT(request: Request, ctx: { params: Promise<{ section: st
 			{ error: `unknown settings section "${section}"`, supported: Object.keys(SETTINGS_SECTIONS) },
 			{ status: 404 },
 		);
+	}
+	if (providersReadOnly() && (SHARED_PROVIDER_SECTIONS as readonly string[]).includes(section)) {
+		return Response.json({ error: PROVIDERS_MANAGED_MESSAGE }, { status: 403 });
 	}
 	const body = await request.json().catch(() => null);
 	const parsed = parser(body);

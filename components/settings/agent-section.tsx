@@ -56,7 +56,7 @@ import { useSettingsSaved } from "@/components/settings-signal";
 import { defaultOrderLevel, populateLevel } from "@/components/thinking-default";
 import { RefreshCw } from "lucide-react";
 import { refreshRemoteModelCatalog, useModelCatalog } from "@/components/model-catalog";
-import type { ModelCatalogRefreshOutcome } from "@/src/core";
+import { PROVIDERS_MANAGED_MESSAGE, type ModelCatalogRefreshOutcome } from "@/src/core";
 import { Hint } from "@/components/ui/hint";
 import { Button } from "@/components/ui/button";
 import { PromptSegmentDialog, type PromptDeleteOutcome, type PromptSaveOutcome } from "./prompt-segment-dialog";
@@ -610,6 +610,8 @@ export function AgentSection({
 					className="mb-1 self-start text-xs text-muted-foreground hover:text-foreground"
 				>{advancedModels ? "Hide advanced settings" : "Show advanced settings"}</button>
 				{catalogFailed && <p role="alert" className="text-xs text-error">Model catalog could not be loaded. Check the connection and retry. <button type="button" className="underline" onClick={refreshCatalog}>Retry</button></p>}
+				{body?.providersReadOnly && <p role="status" className="text-xs text-muted-foreground">{PROVIDERS_MANAGED_MESSAGE}</p>}
+				<fieldset disabled={body?.providersReadOnly} className="contents">
 				{MODEL_SLOTS.map((slot) => {
 					const override = models?.[slot];
 					const modelId = override?.model?.id ?? "";
@@ -739,6 +741,7 @@ export function AgentSection({
 						</SettingsRow>
 					);
 				})}
+				</fieldset>
 				<ModelCatalogRefreshRow />
 				<SettingsRow
 					label="Concurrent worker requests"

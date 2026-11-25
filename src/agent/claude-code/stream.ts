@@ -27,7 +27,9 @@ import { parseStreamingJson, parseToolCallArguments } from "@earendil-works/pi-a
 import { externalCliEnv } from "../../core/auth-env.ts";
 import type { LhMessage } from "../../core/native-messages.ts";
 import { offerWorkerContinuation } from "../worker-request-admission.ts";
+import { providerConnection } from "../../core/provider-role.ts";
 import { ClaudeLaunchError, createClaudeLauncher } from "./launch.ts";
+import { createRemoteClaudeLauncher } from "./remote.ts";
 import { parseCliLine, type CliBlock, type CliEvent, type CliUsage } from "./cli-events.ts";
 import { ClaudeCodeError } from "./constants.ts";
 import { ContextWindowProbe } from "./context-window.ts";
@@ -36,7 +38,10 @@ import { configurationForReuse, conversationForReuse } from "./reuse-context.ts"
 import { BRIDGE_SERVER_NAME, createToolBridge, toolNameFromMcp, type PendingToolCall, type ToolBridge } from "./tool-bridge.ts";
 import { toClaudeInput, toStreamJsonLine } from "./transcript.ts";
 
-type RunClaudeOptions = { cwd: string; env: NodeJS.ProcessEnv; signal?: AbortSignal };
+/** What the shared provider service needs to start this turn itself. */
+export type ClaudeLaunch = { model: string; effort: AnthropicEffort; systemPrompt: string; allowedTools: string[]; authorization: string };
+
+type RunClaudeOptions = { cwd: string; env: NodeJS.ProcessEnv; signal?: AbortSignal; remote?: { launch: ClaudeLaunch; bridgePort: number } };
 
 type ClaudeChild = ChildProcessWithoutNullStreams | null;
 export type RunClaude = (args: string[], options: RunClaudeOptions) => ClaudeChild | Promise<ClaudeChild>;
@@ -382,9 +387,9 @@ class ClaudeTurn {
 	}
 }
 
-type TurnFiles = { cwd: string; privateDir: string; systemPromptFile: string; mcpConfigFile: string };
+export type TurnFiles = { cwd: string; privateDir: string; systemPromptFile: string; mcpConfigFile: string };
 
-async function createTurnFiles(systemPrompt: string, mcpConfig: string): Promise<TurnFiles> {
+export async function createTurnFiles(systemPrompt: string, mcpConfig: string): Promise<TurnFiles> {
 	const cwd = await mkdtemp(join(tmpdir(), "claude-code-cwd-"));
 	let privateDir: string | undefined;
 	try {
@@ -400,12 +405,15 @@ async function createTurnFiles(systemPrompt: string, mcpConfig: string): Promise
 	}
 }
 
-async function removeTurnResources(bridge: ToolBridge, files: TurnFiles): Promise<void> {
+export async function removeTurnFiles(files: TurnFiles): Promise<void> {
 	await Promise.all([
-		bridge.close(),
 		rm(files.cwd, { recursive: true, force: true }),
 		rm(files.privateDir, { recursive: true, force: true }),
 	]);
+}
+
+async function removeTurnResources(bridge: ToolBridge, files: TurnFiles): Promise<void> {
+	await Promise.all([bridge.close(), removeTurnFiles(files)]);
 }
 
 class ClaudeProcess implements LiveProcess {
@@ -659,7 +667,7 @@ function continueLiveProcess(turn: ClaudeTurn, owner: symbol, sessionId: string 
 	return true;
 }
 
-function toClaudeEnv(): NodeJS.ProcessEnv {
+export function toClaudeEnv(): NodeJS.ProcessEnv {
 	// Preserve native CLI auth/routing, including launch-environment credentials.
 	// Claude Code chooses the account and billing method, not LearnHarness.
 	// Loading user settings also loads ~/.claude/CLAUDE.md and memory files;
@@ -705,14 +713,12 @@ async function startProcess(
 
 	let child: ChildProcessWithoutNullStreams | null;
 	try {
-		const args = toClaudeArgs({
-			model: model.id,
-			effort: toEffort(options?.reasoning),
-			systemPromptFile: files.systemPromptFile,
-			mcpConfigFile: files.mcpConfigFile,
-			allowedTools: bridge.allowedTools,
-		});
-		child = await runClaude(args, { cwd: files.cwd, env, signal: options?.signal });
+		const launch: ClaudeLaunch = {
+			model: model.id, effort: toEffort(options?.reasoning), systemPrompt: input.systemPrompt,
+			allowedTools: bridge.allowedTools, authorization: bridge.authorization,
+		};
+		const args = toClaudeArgs({ ...launch, systemPromptFile: files.systemPromptFile, mcpConfigFile: files.mcpConfigFile });
+		child = await runClaude(args, { cwd: files.cwd, env, signal: options?.signal, remote: { launch, bridgePort: bridge.port } });
 	} catch (error) {
 		await removeTurnResources(bridge, files);
 		throw error;
@@ -748,4 +754,5 @@ export function createClaudeCodeStreamFunction(runClaude: RunClaude): StreamFunc
 	};
 }
 
-export const streamClaudeCode = createClaudeCodeStreamFunction(createClaudeLauncher());
+const providers = providerConnection();
+export const streamClaudeCode = createClaudeCodeStreamFunction(providers ? createRemoteClaudeLauncher(providers.socket) : createClaudeLauncher());

@@ -63,6 +63,7 @@ function bridge(): State {
 			else pending.reject(new Error(message.error ?? "Subscription connection failed."));
 		});
 		onWebSubscriptionPacket("lh:subscriptions", (packet) => {
+			if (webSubscriptionsEnabled() && packet.op === "lost") { invalidate(state); notify(state); }
 			if (webSubscriptionsEnabled() && packet.snapshot) accept(state, packet.snapshot as NativeSubscriptionSnapshot);
 		});
 		process.on("disconnect", () => {

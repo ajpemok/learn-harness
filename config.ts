@@ -157,3 +157,7 @@ export const THEMES_DIR = path.join(/* turbopackIgnore: true */ DATA_ROOT, "them
 export const AUTH_FILE = process.env.LH_AUTH_FILE
 	? path.resolve(/* turbopackIgnore: true */ process.env.LH_AUTH_FILE)
 	: path.join(/* turbopackIgnore: true */ ROOT, "auth.json");
+
+/** Provider sections shared between study instances, beside the shared keys.
+ * Read only when LH_PROVIDER_ROLE is set. */
+export const SHARED_PROVIDER_SETTINGS_FILE = path.join(/* turbopackIgnore: true */ path.dirname(AUTH_FILE), "provider-settings.json");

@@ -33,6 +33,7 @@ import {
 	type AuthKeyStatus,
 	type CustomModel,
 	type CustomModelOverride,
+	PROVIDERS_MANAGED_MESSAGE,
 } from "@/src/core";
 import { SettingsGroup } from "./controls.tsx";
 import { SubscriptionConnections } from "./subscription-connections.tsx";
@@ -55,6 +56,8 @@ export interface ProviderKeyInfo {
 interface KeysResponse {
 	keys: AuthKeyStatus[];
 	providers?: ProviderKeyInfo[];
+	/** Another instance manages the provider settings. */
+	readOnly?: boolean;
 }
 
 /** The custom endpoint's non-secret status (GET /api/custom-provider). */
@@ -372,6 +375,7 @@ export function KeysSection({
 }) {
 	const [statuses, setStatuses] = useState<AuthKeyStatus[] | null>(null);
 	const [providers, setProviders] = useState<ProviderKeyInfo[] | undefined>(undefined);
+	const [readOnly, setReadOnly] = useState(false);
 	const [loading, setLoading] = useState(true);
 	/** The unfolded row (its id), null = all folded. Seeded by the
 	 *  deep-link (initialRow) and re-followed when it retargets. */
@@ -407,6 +411,7 @@ export function KeysSection({
 		try {
 			const body = (await fetch("/api/keys").then((r) => r.json())) as KeysResponse;
 			setStatuses(body.keys ?? []);
+			setReadOnly(body.readOnly === true);
 			if (body.providers) setProviders(body.providers);
 		} catch {
 			setStatuses([]);
@@ -485,6 +490,8 @@ export function KeysSection({
 
 	return (
 		<div ref={editorScopeRef} className="contents">
+			{readOnly && <p role="status" data-testid="providers-read-only" className="text-xs text-muted-foreground">{PROVIDERS_MANAGED_MESSAGE}</p>}
+			<fieldset disabled={readOnly} className="contents">
 			<SettingsGroup label="Model API Keys" testid="group-provider-keys">
 				{providerRows.map((status) => (
 					<KeyTableRow
@@ -579,8 +586,10 @@ export function KeysSection({
 			<SettingsGroup label="External CLI" testid="group-external-cli">
 				<ClaudeCodeInstallationStatus />
 			</SettingsGroup>
+			</fieldset>
 
 			{(["Dictation", "Search"] as const).map((label) => <SettingsGroup key={label} label={label} testid={label === "Dictation" ? "group-dictation" : "group-search"}>
+				<fieldset disabled={readOnly} className="contents">
 				{toolRows.filter((status) => label === "Dictation" ? status.id === "DEEPGRAM_API_KEY" : status.id !== "DEEPGRAM_API_KEY").map((status) => (
 					<KeyTableRow
 						key={status.id}
@@ -599,6 +608,7 @@ export function KeysSection({
 						testid={`key-${status.id.toLowerCase()}`}
 					/>
 				))}
+				</fieldset>
 				{label === "Dictation" && <>
 					<DictationLanguageSetting />
 					<p data-testid="dictation-setup-hint" className="px-1 text-[11px] leading-relaxed text-muted-foreground/70">

@@ -4,6 +4,8 @@ export async function register() {
 	if (process.env.NEXT_RUNTIME === "nodejs") {
 		const { registerServerShutdown } = await import("./src/server/shutdown.ts");
 		registerServerShutdown();
+		const { startSharedProviders } = await import("./src/server/shared-providers.ts");
+		startSharedProviders();
 		const { initializeModelCatalog } = await import("./src/server/remote-model-catalog.ts");
 		initializeModelCatalog();
 		const { initializePlugins } = await import("./src/server/plugins.ts");

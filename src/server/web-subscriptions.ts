@@ -11,6 +11,8 @@ import { chatGPTControl } from "../../electron/chatgpt-ipc.cjs";
 import { subscriptionControl } from "../../electron/subscription-ipc.cjs";
 import { emit } from "../core/events.ts";
 import { onServerShutdown, serverIsShuttingDown } from "./shutdown.ts";
+import { providerConnection } from "../core/provider-role.ts";
+import { createProviderServiceClient } from "./provider-service-client.ts";
 import type { ChatGPTStatus } from "../core/contracts/chatgpt.ts";
 import type { NativeSubscriptionSnapshot } from "../core/contracts/subscriptions.ts";
 import { configureWebSubscriptionRuntime, publishWebSubscriptionPacket, webSubscriptionsEnabled, type SubscriptionRuntimeChannel as Channel, type SubscriptionRuntimePacket as Packet } from "../agent/subscription-runtime.ts";
@@ -18,7 +20,7 @@ export { webSubscriptionsEnabled } from "../agent/subscription-runtime.ts";
 interface BrowserAction { target: string; origin: string; scope: string; expires: number; current(): Promise<boolean> }
 const KEY = Symbol.for("lh.webSubscriptions");
 interface Registry {
-	owner?: ReturnType<typeof createWebSubscriptionOwner>;
+	owner?: ReturnType<typeof createWebSubscriptionOwner> | ReturnType<typeof createProviderServiceClient>;
 }
 function registry(): Registry {
 	const global = globalThis as typeof globalThis & { [KEY]?: Registry };
@@ -27,6 +29,11 @@ function registry(): Registry {
 function publish(channel: Channel, packet: Packet) {
 	publishWebSubscriptionPacket(channel, packet);
 	emit("subscriptions-changed", {});
+}
+/** Losing the service is a disconnect: nothing can prove access is still allowed. */
+function serviceLost() {
+	publish("lh:chatgpt", { channel: "lh:chatgpt", kind: "lost" });
+	publish("lh:subscriptions", { channel: "lh:subscriptions", op: "lost" });
 }
 async function loadSDK() {
 	const [sdk, copilot, xai] = await Promise.all([
@@ -70,6 +77,25 @@ export function createWebSubscriptionOwner(options: {
 	};
 	return {
 		chatgpt, native,
+		async status(): Promise<{ chatgpt: ChatGPTStatus; native: NativeSubscriptionSnapshot["statuses"] }> {
+			const [chatgptStatus, nativeStatus] = await Promise.all([chatgpt.status(), native.status()]);
+			return { chatgpt: chatgptStatus, native: nativeStatus };
+		},
+		/** Private runtime calls only: no HTTP lease/token operation exists. */
+		async request<T>(channel: Channel, op: string, fields: Record<string, unknown>): Promise<T> {
+			let value: unknown;
+			if (channel === "lh:chatgpt") {
+				if (op === "status") value = { status: await chatgpt.status(), ...chatgpt.stamp() };
+				else if (op === "models") value = await chatgpt.models();
+				else if (op === "lease" && typeof fields.background === "boolean") value = await chatgpt.lease(fields.background, fields);
+				else throw new Error("Invalid private operation.");
+			} else {
+				if (op === "snapshot") value = await native.snapshot();
+				else if (op === "lease" && typeof fields.background === "boolean") value = await native.lease(fields.scope, fields.background);
+				else throw new Error("Invalid private operation.");
+			}
+			return value as T;
+		},
 		async control(providerId: string, command: Record<string, unknown>, origin: string) {
 			const targets: string[] = [];
 			const value = await launches.run(targets, () => providerId !== "chatgpt"
@@ -105,32 +131,21 @@ export function webSubscriptionOwner() {
 	if (serverIsShuttingDown()) throw new Error("The server is shutting down.");
 	const state = registry();
 	if (!state.owner) {
-		state.owner = createWebSubscriptionOwner({ directory: path.dirname(AUTH_FILE), onPacket: publish });
+		// With a shared provider service this process never opens the credentials.
+		const shared = providerConnection();
+		state.owner = shared
+			? createProviderServiceClient({ ...shared, onPacket: publish, onLost: serviceLost })
+			: createWebSubscriptionOwner({ directory: path.dirname(AUTH_FILE), onPacket: publish });
 		onServerShutdown(() => state.owner?.close());
 		process.once("exit", () => state.owner?.close());
 	}
 	return state.owner;
 }
-/** Private runtime calls only: no HTTP lease/token operation exists. */
 export async function webSubscriptionRequest<T>(channel: Channel, op: string, fields: Record<string, unknown>): Promise<T> {
-	const owner = webSubscriptionOwner();
-	let value: unknown;
-	if (channel === "lh:chatgpt") {
-		if (op === "status") value = { status: await owner.chatgpt.status(), ...owner.chatgpt.stamp() };
-		else if (op === "models") value = await owner.chatgpt.models();
-		else if (op === "lease" && typeof fields.background === "boolean") value = await owner.chatgpt.lease(fields.background, fields);
-		else throw new Error("Invalid private operation.");
-	} else {
-		if (op === "snapshot") value = await owner.native.snapshot();
-		else if (op === "lease" && typeof fields.background === "boolean") value = await owner.native.lease(fields.scope, fields.background);
-		else throw new Error("Invalid private operation.");
-	}
-	return value as T;
+	return webSubscriptionOwner().request<T>(channel, op, fields);
 }
 configureWebSubscriptionRuntime(webSubscriptionRequest);
 
-export async function webSubscriptionStatus(): Promise<{ chatgpt: ChatGPTStatus; native: NativeSubscriptionSnapshot["statuses"] }> {
-	const owner = webSubscriptionOwner();
-	const [chatgpt, native] = await Promise.all([owner.chatgpt.status(), owner.native.status()]);
-	return { chatgpt, native };
+export async function webSubscriptionStatus() {
+	return webSubscriptionOwner().status();
 }

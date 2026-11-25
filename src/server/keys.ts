@@ -125,6 +125,19 @@ export function initAuthEnv(): void {
 	}
 }
 
+/** Follow the primary's key file. The reflected env copies must change with it,
+ * because providers read process.env at request time. */
+export function reloadSharedKeys(): void {
+	const record = boot();
+	const fileVars = authStore.authVars();
+	for (const name of [...record.fillGap]) {
+		if (record.realEnv.has(name)) continue;
+		if (fileVars[name] !== undefined) process.env[name] = fileVars[name];
+		else { delete process.env[name]; record.fillGap.delete(name); }
+	}
+	initAuthEnv();
+}
+
 /** Is this env-var name one the keys system manages (curated, provider,
  *  or held in the file)? */
 function isManagedName(name: string): boolean {

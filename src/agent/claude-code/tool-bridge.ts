@@ -28,6 +28,8 @@ export const MCP_IDENTITY_ERROR = "claude CLI compatibility error: MCP calls mus
 
 export type ToolBridge = {
 	mcpConfig: string;
+	port: number;
+	authorization: string;
 	allowedTools: string[];
 	waitForToolCalls(count: number): Promise<PendingToolCall[]>;
 	resolveToolCall(call: PendingToolCall, result: ToolResultMessage): void;
@@ -196,7 +198,7 @@ function closeHttpServer(server: http.Server): Promise<void> {
 	});
 }
 
-function toMcpConfig(port: number, authorization: string): string {
+export function toMcpConfig(port: number, authorization: string): string {
 	const server = { type: "http", url: `http://${LOOPBACK_HOST}:${port}/mcp`, headers: { Authorization: authorization } };
 
 	return JSON.stringify({ mcpServers: { [BRIDGE_SERVER_NAME]: server } });
@@ -221,6 +223,8 @@ export async function createToolBridge(tools: Tool[], callbacks?: BridgeCallback
 
 	return {
 		mcpConfig: toMcpConfig(port, authorization),
+		port,
+		authorization,
 		allowedTools: tools.map((tool) => `${MCP_TOOL_PREFIX}${tool.name}`),
 		waitForToolCalls: (count) => queue.waitFor(count),
 		resolveToolCall: (call, result) => queue.resolve(call, result),

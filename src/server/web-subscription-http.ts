@@ -1,4 +1,5 @@
 import { NATIVE_SUBSCRIPTIONS } from "../core/contracts/subscriptions.ts";
+import { PROVIDERS_MANAGED_MESSAGE, providersReadOnly } from "../core/provider-role.ts";
 import { subscriptionRequestOrigin } from "./desktop-access.ts";
 import { webSubscriptionOwner, webSubscriptionsEnabled, webSubscriptionStatus } from "./web-subscriptions.ts";
 
@@ -21,6 +22,7 @@ export async function subscriptionControlsResponse(request: Request): Promise<Re
 	try {
 		if (request.method === "GET") return Response.json(await webSubscriptionStatus(), { headers: HEADERS });
 		if (request.method !== "POST") return error("Unsupported method.", 405);
+		if (providersReadOnly()) return error(PROVIDERS_MANAGED_MESSAGE, 403);
 		if (request.headers.get("content-type")?.split(";")[0]?.trim() !== "application/json") return error("Expected JSON.", 415);
 		// Bound both advertised and streamed input before parsing commands.
 		if (Number(request.headers.get("content-length")) > 16384) return error("Request too large.", 413);
@@ -53,6 +55,7 @@ export async function subscriptionBrowserResponse(request: Request): Promise<Res
 	if (!webSubscriptionsEnabled()) return error("Unavailable.", 404);
 	const origin = subscriptionRequestOrigin(request);
 	if (!origin || (request.method === "POST" ? !authorized(request) : request.headers.get("sec-fetch-site") !== "same-origin")) return error("Open sign-in from Learn Harness.", 403);
+	if (providersReadOnly()) return error(PROVIDERS_MANAGED_MESSAGE, 403);
 	const id = new URL(request.url).searchParams.get("id");
 	if (!id || !/^[0-9a-f-]{36}$/.test(id)) return error("This sign-in action is no longer available.", 410);
 	const target = await webSubscriptionOwner().takeBrowserAction(id, origin);

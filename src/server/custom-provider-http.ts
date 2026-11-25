@@ -6,6 +6,7 @@ import { readSettings, writeSettings } from "../store/settings.ts";
 import { readCustomAuth } from "../store/auth.ts";
 import { customAuthState, customKeyAuthorized, persistCustomAuth } from "./custom-provider-auth.ts";
 import type { CustomAuthBinding } from "../core/custom-provider-auth.ts";
+import { PROVIDERS_MANAGED_MESSAGE, providersReadOnly } from "../core/provider-role.ts";
 import { desktopAPIAuthorized } from "./desktop-access.ts";
 import { subscriptionRequestOrigin } from "./web-subscription-http.ts";
 import { discoverModels, mergeManualModels, syncCustomProvider } from "./custom-provider.ts";
@@ -83,6 +84,7 @@ function commit(cp: CustomProviderSettings | undefined, binding?: CustomAuthBind
 
 export async function customProviderMutation(request: Request): Promise<Response> {
 	if (!authorized(request)) return failure("Custom configuration requires a trusted same-origin request.", 403);
+	if (providersReadOnly()) return failure(PROVIDERS_MANAGED_MESSAGE, 403);
 	if (request.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase() !== "application/json") return failure("JSON content-type is required.", 415);
 	try {
 		// Next can represent an empty DELETE as a zero-byte stream rather

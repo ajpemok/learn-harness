@@ -40,7 +40,7 @@ import { useEffect, useRef, useState } from "react";
 import { HostDialog } from "@/components/host-dialog";
 import { useInteractionLayers } from "@/components/interaction-layers";
 import type React from "react";
-import { type ModelCatalogEntry, type ModelSlotName, type ModelsSettings, CUSTOM_PROVIDER } from "@/src/core";
+import { type ModelCatalogEntry, type ModelSlotName, type ModelsSettings, CUSTOM_PROVIDER, PROVIDERS_MANAGED_MESSAGE } from "@/src/core";
 import { prettyModel } from "@/components/usage-format";
 import { ModelMenuList } from "@/components/settings/model-menu";
 import { MenuShell } from "@/components/menu-shell";
@@ -456,7 +456,9 @@ function OpenSetupDialog({ onClose, onDone }: SetupDialogProps) {
 						Model catalog could not be loaded. Check the connection and retry. <button type="button" data-testid="setup-retry" className="underline" onClick={refresh}>Retry</button>
 					</p>
 				)}
-				{stage === "loading" ? (
+				{catalog?.providersReadOnly ? (
+					<p role="status" data-testid="setup-read-only" className="px-6 py-5 text-sm text-foreground">{PROVIDERS_MANAGED_MESSAGE}</p>
+				) : stage === "loading" ? (
 					!failed && <p data-testid="setup-stage-loading" role="status" className="px-6 py-5 text-xs text-muted-foreground">Loading models…</p>
 				) : stage === "keys" ? (
 					<div className="flex flex-col px-6 py-5">{keysBody}</div>

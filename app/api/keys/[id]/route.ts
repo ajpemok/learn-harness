@@ -16,7 +16,7 @@
  * — unknown file vars are preserved, not editable.
  */
 import { isWritableAuthKey } from "@/src/server";
-import { deleteKey, saveKey } from "@/src/server";
+import { deleteKey, PROVIDERS_MANAGED_MESSAGE, providersReadOnly, saveKey } from "@/src/server";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +27,7 @@ export async function PUT(req: Request, { params }: Params) {
 	if (!isWritableAuthKey(id)) {
 		return Response.json({ error: `unknown key "${id}"` }, { status: 404 });
 	}
+	if (providersReadOnly()) return Response.json({ error: PROVIDERS_MANAGED_MESSAGE }, { status: 403 });
 	let body: unknown;
 	try {
 		body = await req.json();
@@ -46,5 +47,6 @@ export async function DELETE(_req: Request, { params }: Params) {
 	if (!isWritableAuthKey(id)) {
 		return Response.json({ error: `unknown key "${id}"` }, { status: 404 });
 	}
+	if (providersReadOnly()) return Response.json({ error: PROVIDERS_MANAGED_MESSAGE }, { status: 403 });
 	return Response.json({ status: deleteKey(id) });
 }
