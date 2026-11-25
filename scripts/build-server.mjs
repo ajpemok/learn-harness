@@ -12,7 +12,6 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { build } from "esbuild";
 import { validateCorePackages } from "./build-core-plugins.mjs";
 import { buildPluginAuthoring } from "./build-plugin-authoring.mjs";
 
@@ -83,15 +82,6 @@ try {
 // Reassemble from current source, never reuse a potentially stale dev download.
 // Ship the complete portable skill plus its static ZIP; no application toolchain.
 buildPluginAuthoring({ root: ROOT, standalone: true });
-
-// The shared provider service is a separate process in the same image, using
-// the same traced dependencies as the app.
-await build({
-	absWorkingDir: ROOT,
-	entryPoints: ["src/provider-service/main.ts"],
-	outfile: path.join(STANDALONE, "provider-service.mjs"),
-	bundle: true, packages: "external", platform: "node", format: "esm", target: "node26",
-});
 
 // 2c) Payload curation (2026-10-11): the trace sweep can copy repo-root
 // plugins/ (authoring sources/tests), dist/ (previous installers), and the development Electron

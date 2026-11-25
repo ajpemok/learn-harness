@@ -14,6 +14,7 @@ RUN npm run plugins:setup \
     && npm run build \
     && node scripts/smoke-provider-runtime.mjs \
     && node scripts/build-server.mjs \
+    && node scripts/build-provider-service.mjs \
     && node scripts/smoke-image-runtime.mjs --standalone .next/standalone \
     && npm run headless:build-check \
     && node scripts/smoke-server.mjs --isolated
