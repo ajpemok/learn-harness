@@ -12,5 +12,7 @@ await build({
 	platform: "node",
 	format: "esm",
 	target: "node26",
+	// The bundled sign-in modules are CommonJS and require Node built-ins.
+	banner: { js: 'import { createRequire as __createRequire } from "node:module"; const require = __createRequire(import.meta.url);' },
 });
 console.log("[provider-service] Bundled the shared provider service.");
